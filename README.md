@@ -10,10 +10,11 @@ Background Fetch is a *very* simple plugin which will awaken an app in the backg
 
 There is **no way** to increase the rate which a fetch-event occurs and this plugin sets the rate to the most frequent possible &mdash; you will **never** receive an event faster than **15 minutes**.  The operating-system will automatically throttle the rate the background-fetch events occur based upon usage patterns.  Eg: if user hasn't turned on their phone for a long period of time, fetch events will occur less frequently.
 
-The Android plugin provides a [Headless](https://pub.dartlang.org/documentation/background_fetch/BackgroundFetchConfig/enableHeadless.html) implementation allowing you to continue handling events even after app-termination.
+The Android plugin provides a [Headless](https://pub.dartlang.org/documentation/background_fetch/latest/background_fetch/BackgroundFetchConfig/enableHeadless.html) implementation allowing you to continue handling events even after app-termination.
 
 # Contents
-- ### :books: [API Documentation](https://pub.dartlang.org/documentation/background_fetch/latest/background_fetch/background_fetch/BackgroundFetch-class.html)
+
+- ### :books: [API Documentation](https://pub.dartlang.org/documentation/background_fetch/latest/background_fetch/BackgroundFetch-class.html)
 - ### [Installing the Plugin](#large_blue_diamond-installing-the-plugin)
 - ### [Setup Guides](#large_blue_diamond-setup-guides)
 - ### [Example](#large_blue_diamond-example)
