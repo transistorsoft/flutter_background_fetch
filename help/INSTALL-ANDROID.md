@@ -38,7 +38,7 @@ Create either `Application.kt` or `Application.java` in the same directory as `M
 - For `Application.kt`, use the following:
 
 ```java
-import com.transistorsoft.flutter.backgroundgeolocation.BackgroundFetchPlugin;
+import com.transistorsoft.flutter.backgroundfetch.BackgroundFetchPlugin;
 
 class Application : FlutterApplication(), PluginRegistrantCallback {
   override fun onCreate() {
@@ -55,7 +55,7 @@ class Application : FlutterApplication(), PluginRegistrantCallback {
 - For `Application.java`, use the following:
 
 ```java
-import com.transistorsoft.flutter.backgroundgeolocation.BackgroundFetchPlugin;
+import com.transistorsoft.flutter.backgroundfetch.BackgroundFetchPlugin;
 
 public class Application extends FlutterApplication implements PluginRegistrantCallback {
   @Override
