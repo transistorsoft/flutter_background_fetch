@@ -62,14 +62,27 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler {
     }
 
     // Called by FLTBackgroundGeolocationPlugin
-    static boolean register(Context context, List<Long> callbacks) {
+    static boolean register(Context context, List<Object> callbacks) {
         SharedPreferences prefs = context.getSharedPreferences(BackgroundFetch.TAG, Context.MODE_PRIVATE);
         if (prefs.contains(KEY_REGISTRATION_CALLBACK_ID) && prefs.contains(KEY_CLIENT_CALLBACK_ID)) {
             return false;
         }
+        // There is weirdness with the class of these callbacks (Integer vs Long) between assembleDebug vs assembleRelease.
+        Object cb1 = callbacks.get(0);
+        Object cb2 = callbacks.get(1);
+
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putLong(KEY_REGISTRATION_CALLBACK_ID, callbacks.get(0));
-        editor.putLong(KEY_CLIENT_CALLBACK_ID, callbacks.get(1));
+        if (cb1.getClass() == Long.class) {
+            editor.putLong(KEY_REGISTRATION_CALLBACK_ID, (Long) cb1);
+        } else if (cb1.getClass() == Integer.class) {
+            editor.putLong(KEY_REGISTRATION_CALLBACK_ID, ((Integer) cb1).longValue());
+        }
+
+        if (cb2.getClass() == Long.class) {
+            editor.putLong(KEY_CLIENT_CALLBACK_ID, (Long) cb2);
+        } else if (cb2.getClass() == Integer.class) {
+            editor.putLong(KEY_CLIENT_CALLBACK_ID, ((Integer) cb2).longValue());
+        }
         editor.apply();
         return true;
     }
