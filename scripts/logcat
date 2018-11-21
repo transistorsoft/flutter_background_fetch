@@ -1,0 +1,2 @@
+#!/bin/sh
+adb logcat *:S flutter:V, TSBackgroundFetch:V

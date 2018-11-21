@@ -3,7 +3,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'background_fetch'
-  s.version          = '0.0.1'
+  s.version          = '0.1.1'
   s.summary          = 'Periodic callbacks in the background for both IOS and Android.'
   s.description      = <<-DESC
 Periodic callbacks in the background for both IOS and Android.

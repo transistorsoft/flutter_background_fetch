@@ -70,7 +70,7 @@ public class BackgroundFetchPlugin implements MethodCallHandler {
         } else if (call.method.equals(BackgroundFetch.ACTION_FINISH)) {
             finish(result);
         } else if (call.method.equals(ACTION_REGISTER_HEADLESS_TASK)) {
-            registerHeadlessTask((List<Long>) call.arguments, result);
+            registerHeadlessTask((List<Object>) call.arguments, result);
         } else {
             result.notImplemented();
         }
@@ -81,7 +81,7 @@ public class BackgroundFetchPlugin implements MethodCallHandler {
         HeadlessTask.setPluginRegistrant(callback);
     }
     // experimental Flutter Headless (NOT READY)
-    private void registerHeadlessTask(List<Long> callbacks, Result result) {
+    private void registerHeadlessTask(List<Object> callbacks, Result result) {
         SharedPreferences prefs = mContext.getSharedPreferences(BackgroundFetch.TAG, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.remove(HeadlessTask.KEY_REGISTRATION_CALLBACK_ID);
