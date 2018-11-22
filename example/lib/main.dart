@@ -1,12 +1,30 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:background_fetch/background_fetch.dart';
+
+const EVENTS_KEY = "fetch_events";
 
 /// This "Headless Task" is run when app is terminated.
 void backgroundFetchHeadlessTask() async {
   print('[BackgroundFetch] Headless event received.');
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  // Read fetch_events from SharedPreferences
+  List<String> events = [];
+  String json = prefs.getString(EVENTS_KEY);
+  if (json != null) {
+    events = jsonDecode(json).cast<String>();
+  }
+  // Add new event.
+  events.insert(0, new DateTime.now().toString() + ' [Headless]');
+  // Persist fetch events in SharedPreferences
+  prefs.setString(EVENTS_KEY, jsonEncode(events));
+
   BackgroundFetch.finish();
 }
 
@@ -28,7 +46,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool _enabled = true;
   int _status = 0;
-  List<DateTime> _events = [];
+  List<String> _events = [];
 
   @override
   void initState() {
@@ -38,22 +56,22 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
+    // Load persisted fetch events from SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String json = prefs.getString(EVENTS_KEY);
+    if (json != null) {
+      setState(() {
+        _events = jsonDecode(json).cast<String>();
+      });
+    }
+
     // Configure BackgroundFetch.
     BackgroundFetch.configure(BackgroundFetchConfig(
         minimumFetchInterval: 15,
         stopOnTerminate: false,
         enableHeadless: true,
         forceReload: false
-    ), () async {
-      // This is the fetch-event callback.
-      print('[BackgroundFetch] Event received');
-      setState(() {
-        _events.insert(0, new DateTime.now());
-      });
-      // IMPORTANT:  You must signal completion of your fetch task or the OS can punish your app
-      // for taking too long in the background.
-      BackgroundFetch.finish();
-    }).then((int status) {
+    ), _onBackgroundFetch).then((int status) {
       print('[BackgroundFetch] SUCCESS: $status');
       setState(() {
         _status = status;
@@ -75,6 +93,22 @@ class _MyAppState extends State<MyApp> {
     // message was in flight, we want to discard the reply rather than calling
     // setState to update our non-existent appearance.
     if (!mounted) return;
+  }
+
+  void _onBackgroundFetch() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // This is the fetch-event callback.
+    print('[BackgroundFetch] Event received');
+    setState(() {
+      _events.insert(0, new DateTime.now().toString());
+    });
+    // Persist fetch events in SharedPreferences
+    prefs.setString(EVENTS_KEY, jsonEncode(_events));
+
+    // IMPORTANT:  You must signal completion of your fetch task or the OS can punish your app
+    // for taking too long in the background.
+    BackgroundFetch.finish();
   }
 
   void _onClickEnable(enabled) {
@@ -101,8 +135,18 @@ class _MyAppState extends State<MyApp> {
       _status = status;
     });
   }
+
+  void _onClickClear() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove(EVENTS_KEY);
+    setState(() {
+      _events = [];
+    });
+  }
   @override
   Widget build(BuildContext context) {
+    const EMPTY_TEXT = Center(child: Text('Waiting for fetch events.  Simulate one.\n [Android] \$ ./scripts/simulate-fetch\n [iOS] XCode->Debug->Simulate Background Fetch'));
+
     return new MaterialApp(
       home: new Scaffold(
         appBar: new AppBar(
@@ -113,29 +157,32 @@ class _MyAppState extends State<MyApp> {
             Switch(value: _enabled, onChanged: _onClickEnable),
           ]
         ),
-        body: Container(
-          color: Colors.black,
+        body: (_events.isEmpty) ? EMPTY_TEXT : Container(
           child: new ListView.builder(
               itemCount: _events.length,
               itemBuilder: (BuildContext context, int index) {
-                DateTime timestamp = _events[index];
+                String timestamp = _events[index];
                 return InputDecorator(
                     decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 10.0, top: 10.0, bottom: 0.0),
-                        labelStyle: TextStyle(color: Colors.amberAccent, fontSize: 20.0),
+                        contentPadding: EdgeInsets.only(left: 5.0, top: 5.0, bottom: 5.0),
+                        labelStyle: TextStyle(color: Colors.blue, fontSize: 20.0),
                         labelText: "[background fetch event]"
                     ),
-                    child: new Text(timestamp.toString(), style: TextStyle(color: Colors.white, fontSize: 16.0))
+                    child: new Text(timestamp, style: TextStyle(color: Colors.black, fontSize: 16.0))
                 );
               }
           ),
         ),
         bottomNavigationBar: BottomAppBar(
-          child: Row(
-            children: <Widget>[
-              RaisedButton(onPressed: _onClickStatus, child: Text('Status')),
-              Container(child: Text("$_status"), margin: EdgeInsets.only(left: 20.0))
-            ]
+          child: Container(
+            padding: EdgeInsets.only(left: 5.0, right:5.0),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  RaisedButton(onPressed: _onClickStatus, child: Text('Status: $_status')),
+                  RaisedButton(onPressed: _onClickClear, child: Text('Clear'))
+                ]
+            )
           )
         ),
       ),
