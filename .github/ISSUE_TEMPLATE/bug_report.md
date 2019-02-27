@@ -12,7 +12,7 @@ assignees: ''
 * Platform: iOS or Android
 * OS version:
 * Device manufacturer / model:
-* Flutter info (`flutter doctor`):
+* Flutter info (`flutter info`, `flutter doctor`):
 * Plugin config
 
 **To Reproduce**
@@ -24,8 +24,7 @@ Steps to reproduce the behavior:
 
 **Debug logs**
 - ios XCode logs, 
-- use #getLog #emailLog methods (@see docs)
-- Android: $ adb logcat
+- Android: `$ adb logcat`
 
 **Additional context**
 Add any other context about the problem here.
