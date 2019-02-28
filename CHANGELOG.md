@@ -1,3 +1,6 @@
+## 0.1.2 - 2018-02-28
+* Fixed bug with setting `jobServiceClass` using a reference to `HeadlessJobService.class`.  This crashes devices < api 21, since Android's `JobService` wasn't available until then.  Simply provide the class name as a `String`.
+
 ## 0.1.1 - 2018-11-21
 * Fixed issue with Android headless config.
 

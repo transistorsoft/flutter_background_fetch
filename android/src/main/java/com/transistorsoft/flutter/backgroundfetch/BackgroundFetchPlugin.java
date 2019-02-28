@@ -29,6 +29,8 @@ public class BackgroundFetchPlugin implements MethodCallHandler {
 
     private static final String ACTION_REGISTER_HEADLESS_TASK = "registerHeadlessTask";
 
+    private static final String HEADLESS_JOB_SERVICE_CLASS = "com.transistorsoft.flutter.backgroundfetch.HeadlessJobService";
+
     private FetchStreamHandler mFetchCallback;
     private Context mContext;
     private boolean mForceReload = false;
@@ -112,7 +114,7 @@ public class BackgroundFetchPlugin implements MethodCallHandler {
         if (params.containsKey("enableHeadless")) {
             boolean enableHeadless = (boolean) params.get("enableHeadless");
             if (enableHeadless) {
-                config.setJobService(HeadlessJobService.class.getName());
+                config.setJobService(HEADLESS_JOB_SERVICE_CLASS);
             }
         }
         BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);

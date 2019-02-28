@@ -324,7 +324,7 @@ class BackgroundFetch {
       completer.complete(true);
     }).catchError((error) {
       String message = error.toString();
-      print('[BackgroundFetch registerHeadlessTask] ‼️ ${message}');
+      print('[BackgroundFetch registerHeadlessTask] ‼️ $message');
       completer.complete(false);
     });
     return completer.future;
