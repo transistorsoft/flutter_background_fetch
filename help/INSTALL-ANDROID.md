@@ -40,6 +40,10 @@ Create either `Application.kt` or `Application.java` in the same directory as `M
 ```java
 import com.transistorsoft.flutter.backgroundfetch.BackgroundFetchPlugin;
 
+import io.flutter.app.FlutterApplication;
+import io.flutter.plugin.common.PluginRegistry;
+import io.flutter.plugins.GeneratedPluginRegistrant;
+
 class Application : FlutterApplication(), PluginRegistrantCallback {
   override fun onCreate() {
     super.onCreate();
@@ -57,7 +61,11 @@ class Application : FlutterApplication(), PluginRegistrantCallback {
 ```java
 import com.transistorsoft.flutter.backgroundfetch.BackgroundFetchPlugin;
 
-public class Application extends FlutterApplication implements PluginRegistrantCallback {
+import io.flutter.app.FlutterApplication;
+import io.flutter.plugin.common.PluginRegistry;
+import io.flutter.plugins.GeneratedPluginRegistrant;
+
+public class Application extends FlutterApplication implements PluginRegistry.PluginRegistrantCallback {
   @Override
   public void onCreate() {
     super.onCreate();
