@@ -1,7 +1,12 @@
 .DS_Store
+.atom/
 .dart_tool/
-
+.idea
 .packages
+packages
+*.iml
+ios/.generated
+.gradle
 .pub/
 pubspec.lock
 doc/
