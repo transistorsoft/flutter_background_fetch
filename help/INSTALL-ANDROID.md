@@ -44,7 +44,7 @@ import io.flutter.app.FlutterApplication;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
-class Application : FlutterApplication(), PluginRegistrantCallback {
+class Application : FlutterApplication(), PluginRegistry.PluginRegistrantCallback {
   override fun onCreate() {
     super.onCreate();
     BackgroundFetchPlugin.setPluginRegistrant(this);
