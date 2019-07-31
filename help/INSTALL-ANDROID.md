@@ -35,9 +35,13 @@ If you intend to use the SDK's Android *Headless* mechanism, you must perform th
 
 Create either `Application.kt` or `Application.java` in the same directory as `MainActivity`.
 
+:warning: Replace `package your.app.name` with your app's package name.  If you don't know your *package name*, you can find it at the 1st line in `MainActivity.java`.
+
 - For `Application.kt`, use the following:
 
 ```java
+package your.app.name;  // <-- replace this
+
 import com.transistorsoft.flutter.backgroundfetch.BackgroundFetchPlugin;
 
 import io.flutter.app.FlutterApplication;
@@ -59,6 +63,8 @@ class Application : FlutterApplication(), PluginRegistry.PluginRegistrantCallbac
 - For `Application.java`, use the following:
 
 ```java
+package your.app.name;  // <-- replace this
+
 import com.transistorsoft.flutter.backgroundfetch.BackgroundFetchPlugin;
 
 import io.flutter.app.FlutterApplication;
