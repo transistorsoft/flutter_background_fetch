@@ -1,28 +1,13 @@
 group 'com.transistorsoft.flutter.backgroundfetch'
 version '1.0-SNAPSHOT'
-
-buildscript {
-    repositories {
-        google()
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.1'
-    }
-}
-
-rootProject.allprojects {
-    repositories {
-        google()
-        jcenter()
-    }
-}
-
 apply plugin: 'com.android.library'
 
+def safeExtGet(prop, fallback) {
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
 android {
-    compileSdkVersion 28
+    compileSdkVersion safeExtGet('compileSdkVersion', 28)
 
     defaultConfig {
         minSdkVersion 16
@@ -33,6 +18,13 @@ android {
     }
 }
 
+repositories {
+    maven {
+        url './libs'
+    }
+}
+
 dependencies {
     implementation fileTree(include: '*.aar', dir: 'libs')
+    implementation "androidx.appcompat:appcompat:${safeExtGet('appCompatVersion', "1.0.2")}"
 }

@@ -1,3 +1,9 @@
+
+## 0.3.0 - 2019-09-18
+* Implement Android `JobInfo` constraints.
+* Fix `NSLog` warnings casting to `long`
+* Default `startOnBoot: true` in example
+
 ## 0.2.0 - 2019-03-15
 * Use AndroidX.
 

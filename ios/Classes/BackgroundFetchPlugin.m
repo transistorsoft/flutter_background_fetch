@@ -31,13 +31,13 @@ static NSString *const ACTION_REGISTER_HEADLESS_TASK = @"registerHeadlessTask";
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
     NSString *methodPath = [NSString stringWithFormat:@"%@/%@", PLUGIN_PATH, METHOD_CHANNEL_NAME];
     FlutterMethodChannel* channel = [FlutterMethodChannel methodChannelWithName:methodPath binaryMessenger:[registrar messenger]];
-    
+
     BackgroundFetchPlugin* instance = [[BackgroundFetchPlugin alloc] init];
     [registrar addApplicationDelegate:instance];
     [registrar addMethodCallDelegate:instance channel:channel];
-    
+
     NSString *eventPath = [NSString stringWithFormat:@"%@/%@", PLUGIN_PATH, EVENT_CHANNEL_NAME];
-    
+
     FlutterEventChannel* eventChannel = [FlutterEventChannel eventChannelWithName:eventPath binaryMessenger:[registrar messenger]];
     [eventChannel setStreamHandler:instance];
 }
@@ -67,10 +67,10 @@ static NSString *const ACTION_REGISTER_HEADLESS_TASK = @"registerHeadlessTask";
 
 -(void) configure:(NSDictionary*)params result:(FlutterResult)result {
     TSBackgroundFetch *fetchManager = [TSBackgroundFetch sharedInstance];
-    
+
     [fetchManager configure:params callback:^(UIBackgroundRefreshStatus status) {
         if (status != UIBackgroundRefreshStatusAvailable) {
-            NSLog(@"- %@ failed to start, status: %lu", PLUGIN_PATH, status);
+            NSLog(@"- %@ failed to start, status: %lu", PLUGIN_PATH, (long)status);
             result([FlutterError errorWithCode: [NSString stringWithFormat:@"%lu", (long) status] message:nil details:@(status)]);
             return;
         }
@@ -92,7 +92,7 @@ static NSString *const ACTION_REGISTER_HEADLESS_TASK = @"registerHeadlessTask";
         if (status == UIBackgroundRefreshStatusAvailable) {
             result(@(status));
         } else {
-            NSLog(@"- %@ failed to start, status: %lu", PLUGIN_PATH, status);
+            NSLog(@"- %@ failed to start, status: %lu", PLUGIN_PATH, (long)status);
             result([FlutterError errorWithCode: [NSString stringWithFormat:@"%lu", (long) status] message:nil details:@(status)]);
         }
     }];

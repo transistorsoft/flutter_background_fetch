@@ -29,6 +29,75 @@ Execution failed for task ':app:processDebugManifest'.
     Suggestion: add 'tools:replace="android:label"' to <application> element at AndroidManifest.xml:15:5-38:19 to override.
 ```
 
+## `android/gradle.properties`
+
+Ensure your app is [migrated to use AndroidX](https://flutter.dev/docs/development/packages-and-plugins/androidx-compatibility).
+
+:open_file_folder: `android/gradle.properties`:
+
+```diff
+org.gradle.jvmargs=-Xmx1536M
++android.enableJetifier=true
++android.useAndroidX=true
+```
+
+## `android/build.gradle`
+
+As an app grows in complexity and imports a variety of 3rd-party modules, it helps to provide some key **"Global Gradle Configuration Properties"** which all modules can align their requested dependency versions to.  `background_fetch` **is aware** of these variables and will align itself to them when detected.
+
+:open_file_folder: `android/build.gradle`:
+
+```diff
+buildscript {
++   ext.kotlin_version = '1.3.0' // Must use 1.3.0 or higher.
++   ext {
++       compileSdkVersion   = 28                // or higher
++       targetSdkVersion    = 28                // or higher
++       appCompatVersion    = "1.0.2"           // or higher
++   }
+
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
++        classpath 'com.android.tools.build:gradle:3.3.1' // Must use 3.3.1 or higher
+    }
+}
+
+```
+
+## `android/app/build.gradle`
+
+In addition, you should take advantage of the *Global Configuration Properties* **yourself**, replacing hard-coded values in your `android/app/build.gradle` with references to these variables:
+
+:open_file_folder: `android/app/build.gradle`:
+
+```diff
+android {
++   compileSdkVersion rootProject.ext.compileSdkVersion
+    .
+    .
+    .
+    defaultConfig {
+        .
+        .
+        .
++       targetSdkVersion rootProject.ext.targetSdkVersion
+    }
+}
+
+# Ensure AndroidX compatibility
+dependencies {
+     testImplementation 'junit:junit:4.12'
+-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
++    androidTestImplementation 'androidx.test:runner:1.1.1'                   // or higher
++    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'   // or higher
+}
+```
+
 ## Headless Mechanism with `enableHeadless: true`
 
 If you intend to use the SDK's Android *Headless* mechanism, you must perform the following additional setup:
