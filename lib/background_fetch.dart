@@ -27,12 +27,16 @@ const _EVENT_CHANNEL_NAME = "$_PLUGIN_PATH/events";
 class BackgroundFetchConfig {
   /// This job doesn't care about network constraints, either any or none.
   static const int NETWORK_TYPE_NONE = 0;
+
   /// This job requires network connectivity.
   static const int NETWORK_TYPE_ANY = 1;
+
   /// This job requires network connectivity that is unmetered.
   static const int NETWORK_TYPE_UNMETERED = 2;
+
   /// This job requires network connectivity that is not roaming.
   static const int NETWORK_TYPE_NOT_ROAMING = 3;
+
   /// This job requires network connectivity that is a cellular network.
   static const int NETWORK_TYPE_CELLULAR = 4;
 
@@ -87,9 +91,8 @@ class BackgroundFetchConfig {
   /// ```
   bool enableHeadless;
 
-  
   /// [Android only] Set detailed description of the kind of network your job requires.
-  /// 
+  ///
   /// If your job doesn't need a network connection, you don't need to use this option, as the default is [[BackgroundFetch.NEWORK_TYPE_NONE]].
   ///
   /// Calling this method defines network as a strict requirement for your job. If the network requested is not available your job will never run.
@@ -131,7 +134,7 @@ class BackgroundFetchConfig {
   /// This state is a loose definition provided by the system. In general, it means that the device is not currently being used interactively, and has not been in use for some time. As such, it is a good time to perform resource heavy jobs. Bear in mind that battery usage will still be attributed to your application, and surfaced to the user in battery stats.
   ///
   bool requiresDeviceIdle;
-  
+
   BackgroundFetchConfig(
       {this.minimumFetchInterval,
       this.stopOnTerminate,
@@ -152,12 +155,16 @@ class BackgroundFetchConfig {
     if (startOnBoot != null) config['startOnBoot'] = startOnBoot;
     if (forceReload != null) config['forceReload'] = forceReload;
     if (enableHeadless != null) config['enableHeadless'] = enableHeadless;
-    if (requiredNetworkType != null) config['requiredNetworkType'] = requiredNetworkType;
-    if (requiresBatteryNotLow != null) config['requiresBatteryNotLow'] = requiresBatteryNotLow;
-    if (requiresStorageNotLow != null) config['requiresStorageNotLow'] = requiresStorageNotLow;
+    if (requiredNetworkType != null)
+      config['requiredNetworkType'] = requiredNetworkType;
+    if (requiresBatteryNotLow != null)
+      config['requiresBatteryNotLow'] = requiresBatteryNotLow;
+    if (requiresStorageNotLow != null)
+      config['requiresStorageNotLow'] = requiresStorageNotLow;
     if (requiresCharging != null) config['requiresCharging'] = requiresCharging;
-    if (requiresDeviceIdle != null) config['requiresDeviceIdle'] = requiresBatteryNotLow;
-    
+    if (requiresDeviceIdle != null)
+      config['requiresDeviceIdle'] = requiresBatteryNotLow;
+
     return config;
   }
 }
