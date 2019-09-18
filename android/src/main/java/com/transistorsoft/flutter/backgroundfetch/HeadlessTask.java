@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.transistorsoft.tsbackgroundfetch.BackgroundFetch;
 
 import org.json.JSONException;
@@ -88,7 +90,7 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler {
     }
 
     @Override
-    public void onMethodCall(MethodCall call, MethodChannel.Result result) {
+    public void onMethodCall(MethodCall call, @NonNull MethodChannel.Result result) {
         Log.i(BackgroundFetch.TAG,"$ " + call.method);
         if (call.method.equalsIgnoreCase(ACTION_INITIALIZED)) {
             synchronized(sHeadlessTaskRegistered) {
@@ -134,7 +136,7 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler {
 
         // Dispatch back to client for initialization.
         FlutterRunArguments args = new FlutterRunArguments();
-        args.bundlePath = FlutterMain.findAppBundlePath(mContext);
+        args.bundlePath = FlutterMain.findAppBundlePath();
         args.entrypoint = callbackInfo.callbackName;
         args.libraryPath = callbackInfo.callbackLibraryPath;
         sBackgroundFlutterView.runFromBundle(args);

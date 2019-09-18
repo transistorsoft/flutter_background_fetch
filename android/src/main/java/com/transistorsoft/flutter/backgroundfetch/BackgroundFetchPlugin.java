@@ -3,7 +3,8 @@ package com.transistorsoft.flutter.backgroundfetch;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.transistorsoft.tsbackgroundfetch.BackgroundFetch;
 import com.transistorsoft.tsbackgroundfetch.BackgroundFetchConfig;
@@ -59,7 +60,7 @@ public class BackgroundFetchPlugin implements MethodCallHandler {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void onMethodCall(MethodCall call, Result result) {
+    public void onMethodCall(MethodCall call, @NonNull Result result) {
         if (call.method.equals(BackgroundFetch.ACTION_CONFIGURE)) {
             Map<String, Object> params = (Map<String, Object>) call.arguments;
             configure(params, result);
@@ -117,6 +118,22 @@ public class BackgroundFetchPlugin implements MethodCallHandler {
                 config.setJobService(HEADLESS_JOB_SERVICE_CLASS);
             }
         }
+        if (params.containsKey("requiredNetworkType")) {
+            config.setRequiredNetworkType((int) params.get("requiredNetworkType"));
+        }
+        if (params.containsKey("requiresBatteryNotLow")) {
+            config.setRequiresBatteryNotLow((boolean) params.get("requiresBatteryNotLow"));
+        }
+        if (params.containsKey("requiresCharging")) {
+            config.setRequiresCharging((boolean) params.get("requiresCharging"));
+        }
+        if (params.containsKey("requiresDeviceIdle")) {
+            config.setRequiresDeviceIdle((boolean) params.get("requiresDeviceIdle"));
+        }
+        if (params.containsKey("requiresStorageNotLow")) {
+            config.setRequiresStorageNotLow((boolean) params.get("requiresStorageNotLow"));
+        }
+
         BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
         adapter.configure(config.build(), mFetchCallback);
 

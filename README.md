@@ -92,7 +92,12 @@ class _MyAppState extends State<MyApp> {
     BackgroundFetch.configure(BackgroundFetchConfig(
         minimumFetchInterval: 15,
         stopOnTerminate: false,
-        enableHeadless: true
+        enableHeadless: false,
+        requiresBatteryNotLow: false,
+        requiresCharging: false,
+        requiresStorageNotLow: false,
+        requiresDeviceIdle: false,
+        requiredNetworkType: BackgroundFetchConfig.NETWORK_TYPE_NONE
     ), () async {
       // This is the fetch-event callback.
       print('[BackgroundFetch] Event received');
@@ -103,12 +108,12 @@ class _MyAppState extends State<MyApp> {
       // for taking too long in the background.
       BackgroundFetch.finish();
     }).then((int status) {
-      print('[BackgroundFetch] SUCCESS: $status');
+      print('[BackgroundFetch] configure success: $status');
       setState(() {
         _status = status;
       });
     }).catchError((e) {
-      print('[BackgroundFetch] ERROR: $e');
+      print('[BackgroundFetch] configure ERROR: $e');
       setState(() {
         _status = e;
       });

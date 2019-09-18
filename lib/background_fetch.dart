@@ -25,6 +25,17 @@ const _EVENT_CHANNEL_NAME = "$_PLUGIN_PATH/events";
 /// })
 ///
 class BackgroundFetchConfig {
+  /// This job doesn't care about network constraints, either any or none.
+  static const int NETWORK_TYPE_NONE = 0;
+  /// This job requires network connectivity.
+  static const int NETWORK_TYPE_ANY = 1;
+  /// This job requires network connectivity that is unmetered.
+  static const int NETWORK_TYPE_UNMETERED = 2;
+  /// This job requires network connectivity that is not roaming.
+  static const int NETWORK_TYPE_NOT_ROAMING = 3;
+  /// This job requires network connectivity that is a cellular network.
+  static const int NETWORK_TYPE_CELLULAR = 4;
+
   /// The minimum interval in minutes to execute background fetch events.
   ///
   /// Defaults to `15` minutes. Note: Background-fetch events will never occur at a frequency higher than every 15 minutes. Apple uses a secret algorithm to adjust the frequency of fetch events, presumably based upon usage patterns of the app. Fetch events can occur less often than your configured `minimumFetchInterval`.
@@ -76,12 +87,62 @@ class BackgroundFetchConfig {
   /// ```
   bool enableHeadless;
 
+  
+  /// [Android only] Set detailed description of the kind of network your job requires.
+  /// 
+  /// If your job doesn't need a network connection, you don't need to use this option, as the default is [[BackgroundFetch.NEWORK_TYPE_NONE]].
+  ///
+  /// Calling this method defines network as a strict requirement for your job. If the network requested is not available your job will never run.
+  ///
+  /// | NetworkType                                      | Description                                                          |
+  ///	|--------------------------------------------------|----------------------------------------------------------------------|
+  ///	| [BackgroundFetchConfig.NETWORK_TYPE_NONE]        | This job doesn't care about network constraints, either any or none. |
+  ///	| [BackgroundFetchConfig.NETWORK_TYPE_ANY]  	     | This job requires network connectivity.                              |
+  ///	| [BackgroundFetchConfig.NETWORK_TYPE_CELLULAR]    | This job requires network connectivity that is a cellular network.   |
+  ///	| [BackgroundFetchConfig.NETWORK_TYPE_UNMETERED]   | This job requires network connectivity that is unmetered.            |
+  ///	| [BackgroundFetchConfig.NETWORK_TYPE_NOT_ROAMING] | This job requires network connectivity that is not roaming.          |
+  ///
+  int requiredNetworkType;
+
+  ///
+  /// [Android only] Specify that to run this job, the device's battery level must not be low.
+  ///
+  ///This defaults to false. If true, the job will only run when the battery level is not low, which is generally the point where the user is given a "low battery" warning.
+  ///
+  bool requiresBatteryNotLow;
+
+  ///
+  /// [Android only] Specify that to run this job, the device's available storage must not be low.
+  ///
+  /// This defaults to false. If true, the job will only run when the device is not in a low storage state, which is generally the point where the user is given a "low storage" warning.
+  ///
+  bool requiresStorageNotLow;
+
+  ///
+  /// [Android only] Specify that to run this job, the device must be charging (or be a non-battery-powered device connected to permanent power, such as Android TV devices). This defaults to false.
+  ///
+  bool requiresCharging;
+
+  ///
+  /// [Android only] When set true, ensure that this job will not run if the device is in active use.
+  ///
+  /// The default state is false: that is, the for the job to be runnable even when someone is interacting with the device.
+  ///
+  /// This state is a loose definition provided by the system. In general, it means that the device is not currently being used interactively, and has not been in use for some time. As such, it is a good time to perform resource heavy jobs. Bear in mind that battery usage will still be attributed to your application, and surfaced to the user in battery stats.
+  ///
+  bool requiresDeviceIdle;
+  
   BackgroundFetchConfig(
       {this.minimumFetchInterval,
       this.stopOnTerminate,
       this.startOnBoot,
       this.forceReload,
-      this.enableHeadless});
+      this.enableHeadless,
+      this.requiredNetworkType,
+      this.requiresBatteryNotLow,
+      this.requiresStorageNotLow,
+      this.requiresCharging,
+      this.requiresDeviceIdle});
 
   Map toMap() {
     Map config = {};
@@ -91,6 +152,12 @@ class BackgroundFetchConfig {
     if (startOnBoot != null) config['startOnBoot'] = startOnBoot;
     if (forceReload != null) config['forceReload'] = forceReload;
     if (enableHeadless != null) config['enableHeadless'] = enableHeadless;
+    if (requiredNetworkType != null) config['requiredNetworkType'] = requiredNetworkType;
+    if (requiresBatteryNotLow != null) config['requiresBatteryNotLow'] = requiresBatteryNotLow;
+    if (requiresStorageNotLow != null) config['requiresStorageNotLow'] = requiresStorageNotLow;
+    if (requiresCharging != null) config['requiresCharging'] = requiresCharging;
+    if (requiresDeviceIdle != null) config['requiresDeviceIdle'] = requiresBatteryNotLow;
+    
     return config;
   }
 }
