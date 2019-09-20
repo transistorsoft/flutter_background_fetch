@@ -1,3 +1,5 @@
+## 0.3.1 - 2019-09-20
+* Fix error `FlutterMain.findBundleAppPath()`.  The plugin modified a deprecated API for flutter 1.9.1, breaking those on previous flutter versions.  Will use deprecated API for now.
 
 ## 0.3.0 - 2019-09-18
 * Implement Android `JobInfo` constraints.
