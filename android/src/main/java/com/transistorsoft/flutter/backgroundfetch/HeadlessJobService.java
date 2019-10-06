@@ -15,8 +15,6 @@ import com.transistorsoft.tsbackgroundfetch.FetchJobService;
 @TargetApi(21)
 public class HeadlessJobService extends JobService {
 
-    private HeadlessTask mHeadlessTask;
-
     @Override
     public boolean onStartJob(final JobParameters params) {
 
