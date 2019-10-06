@@ -40,22 +40,10 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler {
 
     HeadlessTask(Context context) {
         mContext = context;
-        SharedPreferences prefs = context.getSharedPreferences(BackgroundFetch.TAG, Context.MODE_PRIVATE);
-        mRegistrationCallbackId = prefs.getLong(KEY_REGISTRATION_CALLBACK_ID, -1);
-        mClientCallbackId = prefs.getLong(KEY_CLIENT_CALLBACK_ID, -1);
 
         Log.d(BackgroundFetch.TAG, "\uD83D\uDC80 [HeadlessTask]");
-        if (sBackgroundFlutterView == null) {
-            initFlutterView();
-        }
-        synchronized(sHeadlessTaskRegistered) {
-            if (!sHeadlessTaskRegistered.get()) {
-                // Queue up events while background isolate is starting
-                Log.d(BackgroundFetch.TAG, "[HeadlessTask] waiting for client to initialize");
-                return;
-            }
-        }
-        dispatch();
+
+        BackgroundFetch.getThreadPool().execute(new TaskRunner());
     }
 
     // Called by Application#onCreate
@@ -64,28 +52,31 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler {
     }
 
     // Called by FLTBackgroundGeolocationPlugin
-    static boolean register(Context context, List<Object> callbacks) {
-        SharedPreferences prefs = context.getSharedPreferences(BackgroundFetch.TAG, Context.MODE_PRIVATE);
-        if (prefs.contains(KEY_REGISTRATION_CALLBACK_ID) && prefs.contains(KEY_CLIENT_CALLBACK_ID)) {
-            return false;
-        }
-        // There is weirdness with the class of these callbacks (Integer vs Long) between assembleDebug vs assembleRelease.
-        Object cb1 = callbacks.get(0);
-        Object cb2 = callbacks.get(1);
+    static boolean register(final Context context, final List<Object> callbacks) {
+        BackgroundFetch.getThreadPool().execute(new Runnable() {
+            @Override
+            public void run() {
+                SharedPreferences prefs = context.getSharedPreferences(BackgroundFetch.TAG, Context.MODE_PRIVATE);
 
-        SharedPreferences.Editor editor = prefs.edit();
-        if (cb1.getClass() == Long.class) {
-            editor.putLong(KEY_REGISTRATION_CALLBACK_ID, (Long) cb1);
-        } else if (cb1.getClass() == Integer.class) {
-            editor.putLong(KEY_REGISTRATION_CALLBACK_ID, ((Integer) cb1).longValue());
-        }
+                // There is weirdness with the class of these callbacks (Integer vs Long) between assembleDebug vs assembleRelease.
+                Object cb1 = callbacks.get(0);
+                Object cb2 = callbacks.get(1);
 
-        if (cb2.getClass() == Long.class) {
-            editor.putLong(KEY_CLIENT_CALLBACK_ID, (Long) cb2);
-        } else if (cb2.getClass() == Integer.class) {
-            editor.putLong(KEY_CLIENT_CALLBACK_ID, ((Integer) cb2).longValue());
-        }
-        editor.apply();
+                SharedPreferences.Editor editor = prefs.edit();
+                if (cb1.getClass() == Long.class) {
+                    editor.putLong(KEY_REGISTRATION_CALLBACK_ID, (Long) cb1);
+                } else if (cb1.getClass() == Integer.class) {
+                    editor.putLong(KEY_REGISTRATION_CALLBACK_ID, ((Integer) cb1).longValue());
+                }
+
+                if (cb2.getClass() == Long.class) {
+                    editor.putLong(KEY_CLIENT_CALLBACK_ID, (Long) cb2);
+                } else if (cb2.getClass() == Integer.class) {
+                    editor.putLong(KEY_CLIENT_CALLBACK_ID, ((Integer) cb2).longValue());
+                }
+                editor.apply();
+            }
+        });
         return true;
     }
 
@@ -104,6 +95,17 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler {
 
     // Send event to Client.
     private void dispatch() {
+        if (sBackgroundFlutterView == null) {
+            initFlutterView();
+        }
+        synchronized(sHeadlessTaskRegistered) {
+            if (!sHeadlessTaskRegistered.get()) {
+                // Queue up events while background isolate is starting
+                Log.d(BackgroundFetch.TAG, "[HeadlessTask] waiting for client to initialize");
+                return;
+            }
+        }
+
         JSONObject response = new JSONObject();
         try {
             response.put("callbackId", mClientCallbackId);
@@ -141,5 +143,18 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler {
         args.entrypoint = callbackInfo.callbackName;
         args.libraryPath = callbackInfo.callbackLibraryPath;
         sBackgroundFlutterView.runFromBundle(args);
+    }
+
+    class TaskRunner implements Runnable {
+        @Override
+        public void run() {
+            SharedPreferences prefs = mContext.getSharedPreferences(BackgroundFetch.TAG, Context.MODE_PRIVATE);
+            mRegistrationCallbackId = prefs.getLong(KEY_REGISTRATION_CALLBACK_ID, -1);
+            mClientCallbackId = prefs.getLong(KEY_CLIENT_CALLBACK_ID, -1);
+
+            BackgroundFetch.getUiHandler().post(new Runnable() {
+                @Override public void run() { dispatch(); }
+            });
+        }
     }
 }

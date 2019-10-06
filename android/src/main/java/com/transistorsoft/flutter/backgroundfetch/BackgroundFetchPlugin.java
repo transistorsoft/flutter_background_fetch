@@ -2,7 +2,6 @@ package com.transistorsoft.flutter.backgroundfetch;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 
@@ -83,14 +82,8 @@ public class BackgroundFetchPlugin implements MethodCallHandler {
     public static void setPluginRegistrant(PluginRegistry.PluginRegistrantCallback callback) {
         HeadlessTask.setPluginRegistrant(callback);
     }
-    // experimental Flutter Headless (NOT READY)
-    private void registerHeadlessTask(List<Object> callbacks, Result result) {
-        SharedPreferences prefs = mContext.getSharedPreferences(BackgroundFetch.TAG, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.remove(HeadlessTask.KEY_REGISTRATION_CALLBACK_ID);
-        editor.remove(HeadlessTask.KEY_CLIENT_CALLBACK_ID);
-        editor.apply();
 
+    private void registerHeadlessTask(List<Object> callbacks, Result result) {
         if (HeadlessTask.register(mContext, callbacks)) {
             result.success(true);
         } else {
