@@ -163,7 +163,7 @@ class BackgroundFetchConfig {
       config['requiresStorageNotLow'] = requiresStorageNotLow;
     if (requiresCharging != null) config['requiresCharging'] = requiresCharging;
     if (requiresDeviceIdle != null)
-      config['requiresDeviceIdle'] = requiresBatteryNotLow;
+      config['requiresDeviceIdle'] = requiresDeviceIdle;
 
     return config;
   }
