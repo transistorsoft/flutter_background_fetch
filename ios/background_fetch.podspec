@@ -1,14 +1,15 @@
+require 'yaml'
+pubspec = YAML.load_file('../pubspec.yaml')
 #
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html
 #
 Pod::Spec.new do |s|
-  s.name             = 'background_fetch'
-  s.version          = '0.1.1'
-  s.summary          = 'Periodic callbacks in the background for both IOS and Android.'
-  s.description      = <<-DESC
-Periodic callbacks in the background for both IOS and Android.
-                       DESC
-  s.homepage         = 'https://github.com/transistorsoft/flutter_background_fetch'
+  s.name             = pubspec['name']
+  s.version          = pubspec['version']
+  s.summary          = pubspec['description']
+  s.description      = pubspec['description']
+  s.homepage         = pubspec['homepage']
+
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Transistor Software' => 'info@transistorsoft.com' }
   s.source           = { :path => '.' }
