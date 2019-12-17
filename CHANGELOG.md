@@ -1,3 +1,6 @@
+## 0.4.0 - 2019-12-17
+* [Changed] Upgrade to new Flutter Plugin API "V2".  Requires flutter sdk version 1.12.  See [Upgrading pre 1.12 Android Projects](https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects)
+
 ## 0.3.2 - 2019-10-06
 * [Fixed] Resolve Android StrictMode violations; typically from accessing SharedPreferences on main-thread.
 

@@ -64,7 +64,7 @@ class BackgroundFetchConfig {
   ///
   /// See also:  [BackgroundFetch.registerHeadlessTask].
   ///
-  /// * :open_file_folder: **`lib/main.dart`**
+  /// * 📂 **`lib/main.dart`**
   ///
   /// ```dart
   /// import 'dart:async';
@@ -308,7 +308,7 @@ class BackgroundFetch {
   /// **Note:** requires [BackgroundFetchConfig.stopOnTerminate] `false` and [BackgroundFetchConfig.enableHeadless] `true`.
   ///
   /// # Example
-  /// * :open_file_folder: **`lib/main.dart`**
+  /// * 📂 **`lib/main.dart`**
   ///
   /// ```dart
   /// import 'dart:async';
@@ -335,6 +335,12 @@ class BackgroundFetch {
   /// ```
   /// # Setup
   ///
+  /// ## `Flutter >= 1.12`
+  ///
+  /// - If you've upgraded your Flutter SDK to `1.12` (or higher) **AND** [Upgraded Your Android Project](https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects), there are no additional steps required &mdash; everything is now automatic!
+  ///
+  /// ## `Flutter < 1.12`
+  ///
   /// If you intend to use the SDK's Android *Headless* mechanism, you must perform the following additional setup:
   ///
   /// Create either `Application.kt` or `Application.java` in the same directory as `MainActivity`.
@@ -342,6 +348,8 @@ class BackgroundFetch {
   /// - For `Application.kt`, use the following:
   ///
   /// ```java
+  /// package your.app.name;  // <-- replace this
+  ///
   /// import com.transistorsoft.flutter.backgroundgeolocation.BackgroundFetchPlugin;
   ///
   /// class Application : FlutterApplication(), PluginRegistrantCallback {
@@ -359,6 +367,8 @@ class BackgroundFetch {
   /// - For `Application.java`, use the following:
   ///
   /// ```java
+  /// package your.app.name;  // <-- replace this
+  ///
   /// import com.transistorsoft.flutter.backgroundgeolocation.BackgroundFetchPlugin;
   ///
   /// public class Application extends FlutterApplication implements PluginRegistrantCallback {

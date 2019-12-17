@@ -2,12 +2,9 @@ package com.transistorsoft.flutter.backgroundfetch.backgroundfetchexample;
 
 import android.os.StrictMode;
 
-import com.transistorsoft.flutter.backgroundfetch.BackgroundFetchPlugin;
 import io.flutter.app.FlutterApplication;
-import io.flutter.plugin.common.PluginRegistry;
-import io.flutter.plugins.GeneratedPluginRegistrant;
 
-public class Application  extends FlutterApplication implements PluginRegistry.PluginRegistrantCallback {
+public class Application  extends FlutterApplication {
     @Override
     public void onCreate() {
         // Strict mode.
@@ -28,11 +25,5 @@ public class Application  extends FlutterApplication implements PluginRegistry.P
         */
 
         super.onCreate();
-        BackgroundFetchPlugin.setPluginRegistrant(this);
-    }
-
-    @Override
-    public void registerWith(PluginRegistry registry) {
-        GeneratedPluginRegistrant.registerWith(registry);
     }
 }

@@ -1,18 +1,21 @@
 name: background_fetch
 description: Periodic callbacks in the background for both iOS and Android.  Includes Android Headless implementation.
-version: 0.3.2
-author: Chris Scott, Transistor Software <info@transistorsoft.com>
+version: 0.4.0
 homepage: https://github.com/transistorsoft/flutter_background_fetch
 
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
-  flutter: ">=1.2.0 <2.0.0"
+  flutter: ">=1.10.0 <2.0.0"
 dependencies:
   flutter:
     sdk: flutter
 
 flutter:
   plugin:
-    androidPackage: com.transistorsoft.flutter.backgroundfetch
-    pluginClass: BackgroundFetchPlugin
+    platforms:
+      android:
+        package: com.transistorsoft.flutter.backgroundfetch
+        pluginClass: BackgroundFetchPlugin
+      ios:
+        pluginClass: BackgroundFetchPlugin
 
