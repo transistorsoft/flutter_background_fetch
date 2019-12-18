@@ -14,16 +14,16 @@ The Android plugin provides a [Headless](https://pub.dartlang.org/documentation/
 
 # Contents
 
-- ### :books: [API Documentation](https://pub.dartlang.org/documentation/background_fetch/latest/background_fetch/BackgroundFetch-class.html)
+- ### 📚 [API Documentation](https://pub.dartlang.org/documentation/background_fetch/latest/background_fetch/BackgroundFetch-class.html)
 - ### [Installing the Plugin](#large_blue_diamond-installing-the-plugin)
 - ### [Setup Guides](#large_blue_diamond-setup-guides)
 - ### [Example](#large_blue_diamond-example)
 - ### [Debugging](#large_blue_diamond-debugging)
 - ### [Demo Application](#large_blue_diamond-demo-application)
 
-## :large_blue_diamond: Installing the plugin
+## 🔷 Installing the plugin
 
-:open_file_folder: **`pubspec.yaml`**:
+📂 **`pubspec.yaml`**:
 
 ```yaml
 dependencies:
@@ -39,13 +39,13 @@ dependencies:
       url: https://github.com/transistorsoft/flutter_background_fetch
 ```
 
-## :large_blue_diamond: Setup Guides
+## 🔷 Setup Guides
 
 - [iOS](https://github.com/transistorsoft/flutter_background_fetch/blob/master/help/INSTALL-IOS.md)
 - [Android](https://github.com/transistorsoft/flutter_background_fetch/blob/master/help/INSTALL-ANDROID.md)
 
 
-## :large_blue_diamond: Example
+## 🔷 Example
 
 ```dart
 import 'dart:async';
@@ -199,7 +199,7 @@ class _MyAppState extends State<MyApp> {
 
 ```
 
-## :large_blue_diamond: Debugging
+## 🔷 Debugging
 
 ### iOS
 
@@ -222,11 +222,11 @@ $ adb shell am broadcast -a <your.application.id>.event.BACKGROUND_FETCH
 
 ```
 
-## :large_blue_diamond: Demo Application
+## 🔷 Demo Application
 
 This repo contains an `/example` folder.  Clone this repo and open the `/example` folder in Android Studio.
 
-## :large_blue_diamond: Implementation
+## 🔷 Implementation
 
 ### iOS
 
@@ -238,7 +238,7 @@ Android implements background fetch using two different mechanisms, depending on
 
 Unlike iOS, the Android implementation *can* continue to operate after application terminate (`stopOnTerminate: false`) or device reboot (`startOnBoot: true`).
 
-## :large_blue_diamond: Licence
+## 🔷 Licence
 
 The MIT License
 

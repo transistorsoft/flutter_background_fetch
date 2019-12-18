@@ -100,6 +100,11 @@ dependencies {
 
 ## Headless Mechanism with `enableHeadless: true`
 
+### `Flutter >= 1.12`
+- If you've upgraded your Flutter SDK to `1.12` (or higher) **AND** [Upgraded Your Android Project](https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects), there are no additional steps required &mdash; everything is now automatic.
+
+### `Flutter < 1.12`
+
 If you intend to use the SDK's Android *Headless* mechanism, you must perform the following additional setup:
 
 Create either `Application.kt` or `Application.java` in the same directory as `MainActivity`.
@@ -108,7 +113,7 @@ Create either `Application.kt` or `Application.java` in the same directory as `M
 
 - For `Application.kt`, use the following:
 
-```java
+```kotlin
 package your.app.name;  // <-- replace this
 
 import com.transistorsoft.flutter.backgroundfetch.BackgroundFetchPlugin;
@@ -159,5 +164,6 @@ Now edit `AndroidManifest.xml` and provide a reference to your custom `Applicati
     <application
         android:name=".Application"
         ...
+    
 ```
 
