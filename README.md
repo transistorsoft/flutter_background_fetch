@@ -27,7 +27,7 @@ The Android plugin provides a [Headless](https://pub.dartlang.org/documentation/
 
 ```yaml
 dependencies:
-  background_fetch: '^0.2.0'
+  background_fetch: '^0.4.0'
 ```
 
 ### Or latest from Git:
