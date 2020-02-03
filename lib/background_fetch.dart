@@ -8,44 +8,27 @@ const _PLUGIN_PATH = "com.transistorsoft/flutter_background_fetch";
 const _METHOD_CHANNEL_NAME = "$_PLUGIN_PATH/methods";
 const _EVENT_CHANNEL_NAME = "$_PLUGIN_PATH/events";
 
-/// Configuration
-///
-/// ```dart
-/// BackgroundFetch.configure(BackgroundFetchConfig(
-///   minimumFetchInterval: 15,
-///   stopOnTerminate: false,
-///   startOnBoot: true,
-///   enableHeadless: true
-/// ), () {
-///   // This callback is typically fired every 15 minutes while in the background.
-///   print('[BackgroundFetch] Event received.');
-///   // IMPORTANT:  You must signal completion of your fetch task or the OS could
-///   // punish your app for spending much time in the background.
-///   BackgroundFetch.finish();
-/// })
-///
-class BackgroundFetchConfig {
+/// Available NetworkType for use with [AbstractTaskConfig.networkType].
+enum NetworkType {
   /// This job doesn't care about network constraints, either any or none.
-  static const int NETWORK_TYPE_NONE = 0;
+  NONE,
 
   /// This job requires network connectivity.
-  static const int NETWORK_TYPE_ANY = 1;
+  ANY,
 
   /// This job requires network connectivity that is unmetered.
-  static const int NETWORK_TYPE_UNMETERED = 2;
+  UNMETERED,
 
   /// This job requires network connectivity that is not roaming.
-  static const int NETWORK_TYPE_NOT_ROAMING = 3;
+  NOT_ROAMING,
 
   /// This job requires network connectivity that is a cellular network.
-  static const int NETWORK_TYPE_CELLULAR = 4;
+  CELLULAR
+}
 
-  /// The minimum interval in minutes to execute background fetch events.
-  ///
-  /// Defaults to `15` minutes. Note: Background-fetch events will never occur at a frequency higher than every 15 minutes. Apple uses a secret algorithm to adjust the frequency of fetch events, presumably based upon usage patterns of the app. Fetch events can occur less often than your configured `minimumFetchInterval`.
-  ///
-  int minimumFetchInterval;
-
+/// Base class for both [BackgroundFetchConfig] and [TaskConfig].
+///
+class _AbstractTaskConfig {
   /// __Android only__: Set `false` to continue background-fetch events after user terminates the app. Default to `true`.
   bool stopOnTerminate;
 
@@ -54,11 +37,6 @@ class BackgroundFetchConfig {
   /// ❗ NOTE: [startOnBoot] requires [stopOnTerminate]: `false`.
   ///
   bool startOnBoot;
-
-  /// __Android only__: Set `true` to automatically relaunch the application (if it was terminated).
-  ///
-  /// The application will launch to the foreground then immediately minimize. Defaults to `false`.
-  bool forceReload;
 
   /// __Android only__: Set true to enable the Headless mechanism, for handling fetch events after app termination.
   ///
@@ -91,6 +69,11 @@ class BackgroundFetchConfig {
   /// ```
   bool enableHeadless;
 
+  /// __Android only__: Set true to force Task to use Android `AlarmManager` mechanism rather than `JobScheduler`.
+  /// Defaults to `false`.  Will result in more precise scheduling of tasks **at the cost of higher battery usage.**
+  ///
+  bool forceAlarmManager;
+
   /// [Android only] Set detailed description of the kind of network your job requires.
   ///
   /// If your job doesn't need a network connection, you don't need to use this option, as the default is [[BackgroundFetch.NEWORK_TYPE_NONE]].
@@ -99,13 +82,13 @@ class BackgroundFetchConfig {
   ///
   /// | NetworkType                                      | Description                                                          |
   ///	|--------------------------------------------------|----------------------------------------------------------------------|
-  ///	| [BackgroundFetchConfig.NETWORK_TYPE_NONE]        | This job doesn't care about network constraints, either any or none. |
-  ///	| [BackgroundFetchConfig.NETWORK_TYPE_ANY]  	     | This job requires network connectivity.                              |
-  ///	| [BackgroundFetchConfig.NETWORK_TYPE_CELLULAR]    | This job requires network connectivity that is a cellular network.   |
-  ///	| [BackgroundFetchConfig.NETWORK_TYPE_UNMETERED]   | This job requires network connectivity that is unmetered.            |
-  ///	| [BackgroundFetchConfig.NETWORK_TYPE_NOT_ROAMING] | This job requires network connectivity that is not roaming.          |
+  ///	| [NetworkType.NONE]        | This job doesn't care about network constraints, either any or none. |
+  ///	| [NetworkType.ANY]  	     | This job requires network connectivity.                              |
+  ///	| [NetworkType.CELLULAR]    | This job requires network connectivity that is a cellular network.   |
+  ///	| [NetworkType.UNMETERED]   | This job requires network connectivity that is unmetered.            |
+  ///	| [NetworkType.NOT_ROAMING] | This job requires network connectivity that is not roaming.          |
   ///
-  int requiredNetworkType;
+  NetworkType requiredNetworkType;
 
   ///
   /// [Android only] Specify that to run this job, the device's battery level must not be low.
@@ -135,28 +118,26 @@ class BackgroundFetchConfig {
   ///
   bool requiresDeviceIdle;
 
-  BackgroundFetchConfig(
-      {this.minimumFetchInterval,
-      this.stopOnTerminate,
+  _AbstractTaskConfig(
+      {this.stopOnTerminate,
       this.startOnBoot,
-      this.forceReload,
       this.enableHeadless,
+      this.forceAlarmManager,
       this.requiredNetworkType,
       this.requiresBatteryNotLow,
       this.requiresStorageNotLow,
       this.requiresCharging,
       this.requiresDeviceIdle});
 
-  Map toMap() {
-    Map config = {};
-    if (minimumFetchInterval != null)
-      config['minimumFetchInterval'] = minimumFetchInterval;
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> config = {};
     if (stopOnTerminate != null) config['stopOnTerminate'] = stopOnTerminate;
     if (startOnBoot != null) config['startOnBoot'] = startOnBoot;
-    if (forceReload != null) config['forceReload'] = forceReload;
     if (enableHeadless != null) config['enableHeadless'] = enableHeadless;
+    if (forceAlarmManager != null)
+      config['forceAlarmManager'] = forceAlarmManager;
     if (requiredNetworkType != null)
-      config['requiredNetworkType'] = requiredNetworkType;
+      config['requiredNetworkType'] = requiredNetworkType.index;
     if (requiresBatteryNotLow != null)
       config['requiresBatteryNotLow'] = requiresBatteryNotLow;
     if (requiresStorageNotLow != null)
@@ -164,7 +145,102 @@ class BackgroundFetchConfig {
     if (requiresCharging != null) config['requiresCharging'] = requiresCharging;
     if (requiresDeviceIdle != null)
       config['requiresDeviceIdle'] = requiresDeviceIdle;
+    return config;
+  }
+}
 
+/// Background Fetch task Configuration
+///
+/// ```dart
+/// BackgroundFetch.configure(BackgroundFetchConfig(
+///   minimumFetchInterval: 15,
+///   stopOnTerminate: false,
+///   startOnBoot: true,
+///   enableHeadless: true
+/// ), (String taskId) {
+///   // This callback is typically fired every 15 minutes while in the background.
+///   print('[BackgroundFetch] Event received.');
+///   // IMPORTANT:  You must signal completion of your fetch task or the OS could
+///   // punish your app for spending much time in the background.
+///   BackgroundFetch.finish(taskId);
+/// })
+///
+class BackgroundFetchConfig extends _AbstractTaskConfig {
+  /// The minimum interval in minutes to execute background fetch events.
+  ///
+  /// Defaults to `15` minutes. Note: Background-fetch events will never occur at a frequency higher than every 15 minutes. Apple uses a secret algorithm to adjust the frequency of fetch events, presumably based upon usage patterns of the app. Fetch events can occur less often than your configured `minimumFetchInterval`.
+  ///
+  int minimumFetchInterval;
+
+  BackgroundFetchConfig(
+      {this.minimumFetchInterval,
+      bool stopOnTerminate,
+      bool startOnBoot,
+      bool enableHeadless,
+      bool forceAlarmManager,
+      NetworkType requiredNetworkType,
+      bool requiresBatteryNotLow,
+      bool requiresStorageNotLow,
+      bool requiresCharging,
+      bool requiresDeviceIdle})
+      : super(
+            stopOnTerminate: stopOnTerminate,
+            startOnBoot: startOnBoot,
+            enableHeadless: enableHeadless,
+            forceAlarmManager: forceAlarmManager,
+            requiredNetworkType: requiredNetworkType,
+            requiresBatteryNotLow: requiresBatteryNotLow,
+            requiresStorageNotLow: requiresStorageNotLow,
+            requiresCharging: requiresCharging,
+            requiresDeviceIdle: requiresDeviceIdle);
+
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> config = super.toMap();
+    if (minimumFetchInterval != null)
+      config['minimumFetchInterval'] = minimumFetchInterval;
+    return config;
+  }
+}
+
+class TaskConfig extends _AbstractTaskConfig {
+  /// Unique taskId.  This `taskId` will be provided to the BackgroundFetch callback function for use with [BackgroundFetch.finish].
+  String taskId;
+
+  /// Number of milliseconds when this task will fire.
+  int delay;
+
+  /// Controls whether this task should execute repeatedly.  Defaults to `false`.
+  bool periodic;
+
+  TaskConfig({
+    @required this.taskId,
+    @required this.delay,
+    this.periodic = false,
+    bool stopOnTerminate,
+    bool startOnBoot,
+    bool enableHeadless,
+    bool forceAlarmManager,
+    NetworkType requiredNetworkType,
+    bool requiresBatteryNotLow,
+    bool requiresStorageNotLow,
+    bool requiresCharging,
+    bool requiresDeviceIdle,
+  }) : super(
+            stopOnTerminate: stopOnTerminate,
+            startOnBoot: startOnBoot,
+            enableHeadless: enableHeadless,
+            forceAlarmManager: forceAlarmManager,
+            requiredNetworkType: requiredNetworkType,
+            requiresBatteryNotLow: requiresBatteryNotLow,
+            requiresStorageNotLow: requiresStorageNotLow,
+            requiresCharging: requiresCharging,
+            requiresDeviceIdle: requiresDeviceIdle);
+
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> config = super.toMap();
+    config['taskId'] = this.taskId;
+    config['delay'] = this.delay;
+    config['periodic'] = this.periodic;
     return config;
   }
 }
@@ -173,24 +249,82 @@ class BackgroundFetchConfig {
 ///
 /// Background Fetch is a *very* simple plugin which will awaken an app in the background about **every 15 minutes**, providing a short period of background running-time.  This plugin will execute your provided `callbackFn` whenever a background-fetch event occurs.
 ///
-/// There is **no way** to increase the rate which a fetch-event occurs and this plugin sets the rate to the most frequent possible &mdash; you will **never** receive an event faster than **15 minutes**.
+/// ## iOS
+/// There is **no way** to increase the rate which a fetch-event occurs on iOS and this plugin sets the rate to the most frequent possible &mdash; you will **never** receive an event faster than **15 minutes**.
 /// The operating-system will automatically throttle the rate the background-fetch events occur based upon usage patterns.  Eg: if user hasn't turned on their phone for a long period of time, fetch events will occur less frequently.
 ///
+/// ## Android
 /// The Android plugin provides an [BackgroundFetchConfig.enableHeadless] mechanism allowing you to continue handling events even after app-termination (see **[BackgroundFetchConfig.enableHeadless]**).
+///
+/// ```dart
+/// BackgroundFetch.configure(BackgroundFetchConfig(
+///   minimumFetchInterval: 15,  // <-- minutes
+///   stopOnTerminate: false,
+///   startOnBoot: true
+/// ), (String taskId) {
+///   // This callback is typically fired every 15 minutes while in the background.
+///   print('[BackgroundFetch] Event received.');
+///   // IMPORTANT:  You must signal completion of your fetch task or the OS could
+///   // punish your app for spending much time in the background.
+///   BackgroundFetch.finish(taskId);
+/// })
+/// ```
+///
+/// ## Custom Tasks
+///
+/// In addition to the default periodic task that executes according to the configured `minimumFetchInterval`, you may also execute your own custom "oneshot" or "periodic" tasks using the method [scheduleTask]:
+///
+/// __Note__:  All scheduled tasks are fired into the callback `Function` provided to the [configure] method.
 ///
 /// ```dart
 /// BackgroundFetch.configure(BackgroundFetchConfig(
 ///   minimumFetchInterval: 15,
 ///   stopOnTerminate: false,
-///   startOnBoot: true
-/// ), () {
-///   // This callback is typically fired every 15 minutes while in the background.
-///   print('[BackgroundFetch] Event received.');
-///   // IMPORTANT:  You must signal completion of your fetch task or the OS could
-///   // punish your app for spending much time in the background.
-///   BackgroundFetch.finish();
-/// })
+///   forceAlarmManager: true
+/// ), (String taskId) async {
+///   print("[BackgroundFetch] taskId: $taskId");
+///   switch (taskId) {
+///     case 'com.foo.customfetchtask':
+///       // Handle your custom task here.
+///       break;
+///     default:
+///       // Handle the default periodic fetch task here///
+///   }
+///   // You must call finish for each taskId.
+///   BackgroundFetch.finish(taskId);
+/// });
+///
+/// // Task will be executed by Callback provided to #configure, see switch(taskId) above.
+/// BackgroundFetch.scheduleTask(TaskConfig(
+///   taskId: "com.foo.customtask",
+///   delay: 60000,       // milliseconds
+///   periodic: false
+/// ));
 /// ```
+///
+/// ## Android-only:  `forceAlarmManager: true`:
+///
+/// By default, the plugin will use Android's `JobScheduler` when possible.  The `JobScheduler` API prioritizes for battery-life, throttling task-execution based upon device usage and battery level.
+///
+/// Configuring `forceAlarmManager: true` will bypass `JobScheduler` to use Android's older `AlarmManager` API, resulting in more accurate task-execution at the cost of **higher battery usage**.
+///
+/// ```dart
+/// BackgroundFetch.configure(BackgroundFetchConfig(
+///   minimumFetchInterval: 15,
+///   stopOnTerminate: false,
+///   forceAlarmManager: true
+/// ), (String taskId) {
+///   print("[BackgroundFetch] taskId: $taskId");
+///   BackgroundFetch.finish(taskId);
+/// });
+///
+/// BackgroundFetch.scheduleTask(TaskConfig(
+///   taskId: 'com.foo.customtask',
+///   delay: 5000,       // milliseconds
+///   forceAlarmManager: true
+///   periodic: false
+/// ));
+///
 ///
 class BackgroundFetch {
   /// See [status].  Background updates are unavailable and the user cannot enable them again. For example, this status can occur when parental controls are in effect for the current user.
@@ -226,7 +360,7 @@ class BackgroundFetch {
   ///   minimumFetchInterval: 15,
   ///   stopOnTerminate: false,
   ///   startOnBoot: true
-  /// ), () {
+  /// ), (String taskId) {
   ///   // This callback is typically fired every 15 minutes while in the background.
   ///   print('[BackgroundFetch] Event received.');
   ///   // IMPORTANT:  You must signal completion of your fetch task or the OS could punish your app for
@@ -240,7 +374,7 @@ class BackgroundFetch {
       _eventsFetch = _eventChannel.receiveBroadcastStream();
 
       _eventsFetch.listen((dynamic v) {
-        callback();
+        callback(v);
       });
     }
     Completer completer = new Completer<int>();
@@ -270,11 +404,37 @@ class BackgroundFetch {
     return completer.future;
   }
 
-  /// Stop the background-fetch API from firing fetch events.
+  /// Stop the background-fetch API from firing events.
   ///
-  /// Your `callback` provided to [configure] will no longer be executed.
-  static Future<int> stop() async {
-    int status = await _methodChannel.invokeMethod('stop');
+  /// If provided with an optional `taskId`, will halt only that task.  If provided no `taskId`, will stop all tasks.
+  ///
+  /// ```dart
+  /// BackgroundFetch.configure(BackgroundFetchConfig(
+  ///   minimumFetchInterval: 15
+  /// ), (String taskId) {
+  ///   print("[BackgroundFetch] taskId: $taskId");
+  ///   BackgroundFetch.finish(taskId);
+  /// });
+  ///
+  /// BackgroundFetch.scheduleTask(TaskConfig({
+  ///   taskId: 'foo',
+  ///   delay: 10000,
+  ///   forceAlarmManager: true
+  /// });
+  /// .
+  /// .
+  /// .
+  /// // Stop only the task named 'foo', leaving the primary background-fetch events running.
+  /// BackgroundFetch.stop('foo');
+  /// .
+  /// .
+  /// .
+  /// // Or stop ALL tasks
+  /// BackgroundFetch.stop();
+  ///
+  ///
+  static Future<int> stop([String taskId]) async {
+    int status = await _methodChannel.invokeMethod('stop', taskId);
     return status;
   }
 
@@ -283,24 +443,46 @@ class BackgroundFetch {
     return status;
   }
 
-  /// Signal to the OS that your fetch-event is complete.
+  /// Schedule a background-task to occur in [TaskConfig.delay] milliseconds.
+  ///
+  /// These tasks are "one-shot" tasks by default.  To execute a repeating task, set [TaskConfig.periodic] to `true`.
+  ///
+  /// __Note__:  All tasks are fired into the callback Function provided to [BackgroundFetch.configure].  You cannot provide a callback Function to *this* method.
+  ///
+  /// ```dart
+  /// BackgroundFetch.configure(BackgroundFetchConfig(
+  ///   minimumFetchInterval: 15
+  /// ), (String taskId) {
+  ///   print("[BackgroundFetch] taskId: $taskId");
+  ///   switch (taskId) {
+  ///     case 'com.foo.my.task':
+  ///       print('My custom task fired');
+  ///       break;
+  ///     default:
+  ///       print('Background Fetch event fired');
+  ///   }
+  ///   BackgroundFetch.finish(taskId);
+  /// });
+  ///
+  /// // Scheduled task events will be fired into the Callback provided to #configure method above.
+  /// BackgroundFetch.scheduleTask(TaskConfig(
+  ///   taskId: 'com.foo.my.task',
+  ///   delay: 60000,
+  ///   periodic: true
+  /// ));
+  ///
+  static Future<bool> scheduleTask(TaskConfig config) async {
+    return await _methodChannel.invokeMethod('scheduleTask', config.toMap());
+  }
+
+  /// Signal to the OS that your fetch-event for the provided `taskId` is complete.
   ///
   /// You __MUST__ call `finish` in your fetch `callback` provided to [configure] in order to signal to the OS that your fetch action is complete. iOS provides only 30s of background-time for a fetch-event -- if you exceed this 30s, the OS will punish your app for spending too much time in the background.
   ///
-  /// Valid values for fetchResult (int):
-  ///
-  /// | Name                                    | Value  |
-  /// |-----------------------------------------|--------|
-  /// | [BackgroundFetch.FETCH_RESULT_NEW_DATA] | `0`    |
-  /// | [BackgroundFetch.FETCH_RESULT_FAILED]   | `1`    |
-  /// | [BackgroundFetch.FETCH_RESULT_NO_DATA]  | `2`    |
   ///
   ///
-  static void finish([int fetchResult]) {
-    if (fetchResult == null) {
-      fetchResult = FETCH_RESULT_NEW_DATA;
-    }
-    _methodChannel.invokeMethod('finish', fetchResult);
+  static void finish(String taskId) {
+    _methodChannel.invokeMethod('finish', taskId);
   }
 
   /// __Android-only__:  Registers a global function to execute when your app has been terminated.
@@ -318,9 +500,9 @@ class BackgroundFetch {
   /// import 'package:background_fetch/background_fetch.dart';
   ///
   /// // This "Headless Task" is run when app is terminated.
-  /// void backgroundFetchHeadlessTask() async {
+  /// void backgroundFetchHeadlessTask(String taskId) async {
   ///   print('[BackgroundFetch] Headless event received.');
-  ///   BackgroundFetch.finish();
+  ///   BackgroundFetch.finish(taskId);
   /// }
   ///
   /// void main() {
@@ -434,7 +616,7 @@ void _headlessCallbackDispatcher() {
             '[BackgroundFetch _headlessCallbackDispatcher] ERROR: Failed to get callback from handle: $args');
         return;
       }
-      callback();
+      callback(args['taskId']);
     } catch (e, stacktrace) {
       print('[BackgroundFetch _headlessCallbackDispather] ‼️ Callback error: ' +
           e.toString());

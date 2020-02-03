@@ -8,9 +8,14 @@ import 'package:background_fetch/background_fetch.dart';
 
 const EVENTS_KEY = "fetch_events";
 
+const MethodChannel _methodChannel = const MethodChannel("channel_foo");
+
+
 /// This "Headless Task" is run when app is terminated.
-void backgroundFetchHeadlessTask() async {
-  print('[BackgroundFetch] Headless event received.');
+void backgroundFetchHeadlessTask(String taskId) async {
+  print("[BackgroundFetch] Headless event received: $taskId");
+  DateTime timestamp = DateTime.now();
+  _methodChannel.invokeMethod('test');
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -21,11 +26,23 @@ void backgroundFetchHeadlessTask() async {
     events = jsonDecode(json).cast<String>();
   }
   // Add new event.
-  events.insert(0, new DateTime.now().toString() + ' [Headless]');
+  events.insert(0, "$taskId@$timestamp [Headless]");
   // Persist fetch events in SharedPreferences
   prefs.setString(EVENTS_KEY, jsonEncode(events));
 
-  BackgroundFetch.finish();
+  BackgroundFetch.finish(taskId);
+
+  /*
+  BackgroundFetch.scheduleTask(TaskConfig(
+      taskId: "foo",
+      delay: 5000,
+      periodic: false,
+      forceAlarmManager: true,
+      stopOnTerminate: false,
+      enableHeadless: true
+  ));
+
+   */
 }
 
 void main() {
@@ -75,7 +92,7 @@ class _MyAppState extends State<MyApp> {
         requiresCharging: false,
         requiresStorageNotLow: false,
         requiresDeviceIdle: false,
-        requiredNetworkType: BackgroundFetchConfig.NETWORK_TYPE_NONE
+        requiredNetworkType: NetworkType.NONE,
     ), _onBackgroundFetch).then((int status) {
       print('[BackgroundFetch] configure success: $status');
       setState(() {
@@ -87,6 +104,8 @@ class _MyAppState extends State<MyApp> {
         _status = e;
       });
     });
+
+
 
     // Optionally query the current BackgroundFetch status.
     int status = await BackgroundFetch.status;
@@ -100,20 +119,31 @@ class _MyAppState extends State<MyApp> {
     if (!mounted) return;
   }
 
-  void _onBackgroundFetch() async {
+  void _onBackgroundFetch(String taskId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
+    DateTime timestamp = new DateTime.now();
     // This is the fetch-event callback.
-    print('[BackgroundFetch] Event received');
+    print("[BackgroundFetch] Event received: $taskId");
     setState(() {
-      _events.insert(0, new DateTime.now().toString());
+      _events.insert(0, "$taskId@${timestamp.toString()}");
     });
     // Persist fetch events in SharedPreferences
     prefs.setString(EVENTS_KEY, jsonEncode(_events));
 
+    if (taskId == "com.transistorsoft.fetch") {
+      BackgroundFetch.scheduleTask(TaskConfig(
+          taskId: "foo",
+          delay: 5000,
+          periodic: false,
+          forceAlarmManager: true,
+          stopOnTerminate: false,
+          enableHeadless: true
+      ));
+    }
+
     // IMPORTANT:  You must signal completion of your fetch task or the OS can punish your app
     // for taking too long in the background.
-    BackgroundFetch.finish();
+    BackgroundFetch.finish(taskId);
   }
 
   void _onClickEnable(enabled) {
@@ -166,14 +196,14 @@ class _MyAppState extends State<MyApp> {
           child: new ListView.builder(
               itemCount: _events.length,
               itemBuilder: (BuildContext context, int index) {
-                String timestamp = _events[index];
+                List<String> event = _events[index].split("@");
                 return InputDecorator(
                     decoration: InputDecoration(
                         contentPadding: EdgeInsets.only(left: 5.0, top: 5.0, bottom: 5.0),
                         labelStyle: TextStyle(color: Colors.blue, fontSize: 20.0),
-                        labelText: "[background fetch event]"
+                        labelText: "[${event[0].toString()}]"
                     ),
-                    child: new Text(timestamp, style: TextStyle(color: Colors.black, fontSize: 16.0))
+                    child: new Text(event[1], style: TextStyle(color: Colors.black, fontSize: 16.0))
                 );
               }
           ),

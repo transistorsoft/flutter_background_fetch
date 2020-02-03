@@ -2,8 +2,10 @@ package com.transistorsoft.flutter.backgroundfetch;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.transistorsoft.tsbackgroundfetch.BackgroundFetch;
 import com.transistorsoft.tsbackgroundfetch.BackgroundFetchConfig;
@@ -30,12 +32,12 @@ public class BackgroundFetchModule implements MethodCallHandler {
     private static final String EVENT_CHANNEL_NAME          = PLUGIN_ID + "/events";
 
     private static final String ACTION_REGISTER_HEADLESS_TASK = "registerHeadlessTask";
+    private static final String ACTION_SCHEDULE_TASK          = "scheduleTask";
 
-    private static final String HEADLESS_JOB_SERVICE_CLASS = "com.transistorsoft.flutter.backgroundfetch.HeadlessJobService";
+    private static final String HEADLESS_JOB_SERVICE_CLASS = HeadlessTask.class.getName();
 
     private FetchStreamHandler mFetchCallback;
     private Context mContext;
-    private boolean mForceReload = false;
 
     private BinaryMessenger mMessenger;
     private AtomicBoolean mIsAttachedToEngine = new AtomicBoolean(false);
@@ -87,13 +89,17 @@ public class BackgroundFetchModule implements MethodCallHandler {
         } else if (call.method.equals(BackgroundFetch.ACTION_START)) {
             start(result);
         } else if (call.method.equals(BackgroundFetch.ACTION_STOP)) {
-            stop(result);
+            stop((String) call.arguments, result);
         } else if (call.method.equals(BackgroundFetch.ACTION_STATUS)) {
             status(result);
         } else if (call.method.equals(BackgroundFetch.ACTION_FINISH)) {
-            finish(result);
+            String taskId = (String) call.arguments;
+            finish(taskId, result);
         } else if (call.method.equals(ACTION_REGISTER_HEADLESS_TASK)) {
             registerHeadlessTask((List<Object>) call.arguments, result);
+        } else if (call.method.equals(ACTION_SCHEDULE_TASK)) {
+            Map<String, Object> params = (Map<String, Object>) call.arguments;
+            scheduleTask(params, result);
         } else {
             result.notImplemented();
         }
@@ -108,15 +114,56 @@ public class BackgroundFetchModule implements MethodCallHandler {
     }
 
     private void configure(Map<String, Object> params, Result result) {
+        BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
+        adapter.configure(buildConfig(params), mFetchCallback);
+        result.success(adapter.status());
+    }
+
+    private void start(Result result) {
+        BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
+        adapter.start();
+        result.success(adapter.status());
+    }
+
+    private void stop(@Nullable String taskId, Result result) {
+        BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
+        adapter.stop(taskId);
+        result.success(adapter.status());
+    }
+
+    private void status(Result result) {
+        BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
+        result.success(adapter.status());
+    }
+
+    private void finish(String taskId, Result result) {
+        BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
+
+        adapter.finish(taskId);
+        result.success(true);
+    }
+
+    private void scheduleTask(Map<String, Object> params, Result result) {
+        BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
+        adapter.scheduleTask(buildConfig(params));
+        result.success(true);
+    }
+
+    private BackgroundFetchConfig buildConfig(Map<String, Object>params) {
         BackgroundFetchConfig.Builder config = new BackgroundFetchConfig.Builder();
+
+        if (params.containsKey(BackgroundFetchConfig.FIELD_TASK_ID)) {
+            config.setTaskId((String) params.get(BackgroundFetchConfig.FIELD_TASK_ID));
+        }
         if (params.containsKey("minimumFetchInterval")) {
             config.setMinimumFetchInterval((int) params.get("minimumFetchInterval"));
         }
+        if (params.containsKey("delay")) {
+            Integer delay = (Integer) params.get("delay");
+            if (delay != null) config.setDelay(delay.longValue());
+        }
         if (params.containsKey("stopOnTerminate")) {
             config.setStopOnTerminate((boolean) params.get("stopOnTerminate"));
-        }
-        if (params.containsKey("forceReload")) {
-            config.setForceReload((boolean) params.get("forceReload"));
         }
         if (params.containsKey("startOnBoot")) {
             config.setStartOnBoot((boolean) params.get("startOnBoot"));
@@ -142,46 +189,21 @@ public class BackgroundFetchModule implements MethodCallHandler {
         if (params.containsKey("requiresStorageNotLow")) {
             config.setRequiresStorageNotLow((boolean) params.get("requiresStorageNotLow"));
         }
-
-        BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
-        adapter.configure(config.build(), mFetchCallback);
-
-        if (mForceReload) {
-            mFetchCallback.onFetch();
+        if (params.containsKey("forceAlarmManager")) {
+            config.setForceAlarmManager((boolean) params.get("forceAlarmManager"));
         }
-        mForceReload = false;
-        result.success(adapter.status());
-    }
-
-    private void start(Result result) {
-        BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
-        adapter.start();
-        result.success(adapter.status());
-    }
-
-    private void stop(Result result) {
-        BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
-        adapter.stop();
-        result.success(adapter.status());
-    }
-
-    private void status(Result result) {
-        BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
-        result.success(adapter.status());
-    }
-
-    private void finish(Result result) {
-        BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
-        adapter.finish();
-        result.success(true);
+        if (params.containsKey("periodic")) {
+            config.setPeriodic((boolean) params.get("periodic"));
+        }
+        return config.build();
     }
 
     class FetchStreamHandler implements EventChannel.StreamHandler, BackgroundFetch.Callback {
         private EventChannel.EventSink mEventSink;
 
         @Override
-        public void onFetch() {
-            mEventSink.success(true);
+        public void onFetch(String taskId) {
+            mEventSink.success(taskId);
         }
         @Override
         public void onListen(Object args, EventChannel.EventSink eventSink) {

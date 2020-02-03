@@ -2,8 +2,11 @@
 #import <TSBackgroundFetch/TSBackgroundFetch.h>
 
 static NSString *const PLUGIN_PATH = @"com.transistorsoft/flutter_background_fetch";
+static NSString *const BACKGROUND_FETCH_TASK_ID = @"com.transistorsoft.fetch";
+
 static NSString *const METHOD_CHANNEL_NAME      = @"methods";
 static NSString *const EVENT_CHANNEL_NAME       = @"events";
+static NSString *const EVENT_CHANNEL_SCHEDULED_TASKS = @"events/scheduled";
 
 static NSString *const ACTION_CONFIGURE = @"configure";
 static NSString *const ACTION_START     = @"start";
@@ -11,7 +14,7 @@ static NSString *const ACTION_STOP      = @"stop";
 static NSString *const ACTION_FINISH    = @"finish";
 static NSString *const ACTION_STATUS    = @"status";
 static NSString *const ACTION_REGISTER_HEADLESS_TASK = @"registerHeadlessTask";
-
+static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
 
 @interface BackgroundFetchPlugin ()<FlutterStreamHandler>
 @end
@@ -28,6 +31,12 @@ static NSString *const ACTION_REGISTER_HEADLESS_TASK = @"registerHeadlessTask";
     return YES;
 }
 
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    
+    [[TSBackgroundFetch sharedInstance] registerBackgroundFetchTask:BACKGROUND_FETCH_TASK_ID];
+    return YES;
+}
+
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
     NSString *methodPath = [NSString stringWithFormat:@"%@/%@", PLUGIN_PATH, METHOD_CHANNEL_NAME];
     FlutterMethodChannel* channel = [FlutterMethodChannel methodChannelWithName:methodPath binaryMessenger:[registrar messenger]];
@@ -37,9 +46,12 @@ static NSString *const ACTION_REGISTER_HEADLESS_TASK = @"registerHeadlessTask";
     [registrar addMethodCallDelegate:instance channel:channel];
 
     NSString *eventPath = [NSString stringWithFormat:@"%@/%@", PLUGIN_PATH, EVENT_CHANNEL_NAME];
-
     FlutterEventChannel* eventChannel = [FlutterEventChannel eventChannelWithName:eventPath binaryMessenger:[registrar messenger]];
     [eventChannel setStreamHandler:instance];
+    
+    NSString *scheduledEventPath = [NSString stringWithFormat:@"%@/%@", PLUGIN_PATH, EVENT_CHANNEL_SCHEDULED_TASKS];
+    FlutterEventChannel* eventChannelScheduled = [FlutterEventChannel eventChannelWithName:scheduledEventPath binaryMessenger:[registrar messenger]];
+    [eventChannelScheduled setStreamHandler:instance];
 }
 
 -(instancetype) init {
@@ -57,9 +69,11 @@ static NSString *const ACTION_REGISTER_HEADLESS_TASK = @"registerHeadlessTask";
     } else if ([self method:call.method is:ACTION_STATUS]) {
         [self status:result];
     } else if ([self method:call.method is:ACTION_FINISH]) {
-        [self finish:[call.arguments integerValue] result:result];
+        [self finish:call.arguments result:result];
     } else if ([self method:call.method is:ACTION_REGISTER_HEADLESS_TASK]) {
         result(@(YES));
+    } else if ([self method:call.method is:ACTION_SCHEDULE_TASK]) {
+        [self scheduleTask:call.arguments result:result];
     } else {
         result(FlutterMethodNotImplemented);
     }
@@ -74,21 +88,15 @@ static NSString *const ACTION_REGISTER_HEADLESS_TASK = @"registerHeadlessTask";
             result([FlutterError errorWithCode: [NSString stringWithFormat:@"%lu", (long) status] message:nil details:@(status)]);
             return;
         }
-        void (^handler)(void);
-        handler = ^void(void){
-            if (self->eventSink != nil) {
-                self->eventSink(@(YES));
-            }
-        };
-        [fetchManager addListener:PLUGIN_PATH callback:handler];
-        [fetchManager start];
+        [fetchManager addListener:BACKGROUND_FETCH_TASK_ID callback:[self createCallback]];
+        [fetchManager start:BACKGROUND_FETCH_TASK_ID];
         result(@(status));
     }];
 }
 
 -(void) start:(FlutterResult)result {
     TSBackgroundFetch *fetchManager = [TSBackgroundFetch sharedInstance];
-    [fetchManager start:^(UIBackgroundRefreshStatus status) {
+    [fetchManager start:BACKGROUND_FETCH_TASK_ID callback:^(UIBackgroundRefreshStatus status) {
         if (status == UIBackgroundRefreshStatusAvailable) {
             result(@(status));
         } else {
@@ -100,7 +108,7 @@ static NSString *const ACTION_REGISTER_HEADLESS_TASK = @"registerHeadlessTask";
 
 -(void) stop:(FlutterResult)result {
     TSBackgroundFetch *fetchManager = [TSBackgroundFetch sharedInstance];
-    [fetchManager stop];
+    [fetchManager stop:BACKGROUND_FETCH_TASK_ID];
     [self status:result];
 }
 
@@ -110,22 +118,38 @@ static NSString *const ACTION_REGISTER_HEADLESS_TASK = @"registerHeadlessTask";
     }];
 }
 
--(void) finish:(NSInteger)fetchResult result:(FlutterResult)flutterResult {
-    UIBackgroundFetchResult result = UIBackgroundFetchResultNewData;
-    if (fetchResult == UIBackgroundFetchResultNewData
-        || fetchResult == UIBackgroundFetchResultNoData
-        || fetchResult == UIBackgroundFetchResultFailed) {
-        result = fetchResult;
-    }
+-(void) finish:(NSString*)taskId result:(FlutterResult)flutterResult {
     TSBackgroundFetch *fetchManager = [TSBackgroundFetch sharedInstance];
-    [fetchManager finish:PLUGIN_PATH result:result];
+    [fetchManager finish:taskId];
     flutterResult(@(YES));
+}
+
+- (void) scheduleTask:(NSDictionary*)config result:(FlutterResult)result {
+    NSString *taskId = [config objectForKey:@"taskId"];
+    long delayMS = [[config objectForKey:@"delay"] longValue];
+    NSTimeInterval delay = delayMS / 1000;
+    
+    NSError *error = [[TSBackgroundFetch sharedInstance] scheduleTask:taskId delay:delay callback:[self createCallback]];
+    
+    if (!error) {
+        result(@(YES));
+    } else {
+        result([FlutterError errorWithCode: [NSString stringWithFormat:@"%lu", (long) error.code] message:nil details:error.domain]);
+    }
 }
 
 - (BOOL) method:(NSString*)method is:(NSString*)action {
     return [method isEqualToString:action];
 }
 
+-(void (^)(NSString* taskId)) createCallback {
+    return ^void(NSString* taskId){
+        if (self->eventSink != nil) {
+            self->eventSink(taskId);
+        }
+    };
+}
+    
 #pragma mark FlutterStreamHandler impl
 
 - (FlutterError*)onListenWithArguments:(id)arguments eventSink:(FlutterEventSink)sink {

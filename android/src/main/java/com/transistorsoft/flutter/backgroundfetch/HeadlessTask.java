@@ -12,6 +12,7 @@ import com.transistorsoft.tsbackgroundfetch.BackgroundFetch;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -42,6 +43,9 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
 
     private long mRegistrationCallbackId;
     private long mClientCallbackId;
+    private String mTaskId;
+
+    private static final List<OnInitializedCallback> sOnInitializedListeners = new ArrayList<>();
 
     // Called by Application#onCreate
     static void setPluginRegistrant(PluginRegistry.PluginRegistrantCallback callback) {
@@ -54,9 +58,10 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
         return true;
     }
 
-    HeadlessTask(Context context) {
+    public HeadlessTask(Context context, String taskId) {
         mContext = context;
-        Log.d(BackgroundFetch.TAG, "\uD83D\uDC80 [HeadlessTask]");
+        mTaskId = taskId;
+        Log.d(BackgroundFetch.TAG, "\uD83D\uDC80 [HeadlessTask " + mTaskId + "]");
         BackgroundFetch.getThreadPool().execute(new TaskRunner());
     }
 
@@ -64,11 +69,23 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
     public void onMethodCall(MethodCall call, @NonNull MethodChannel.Result result) {
         Log.i(BackgroundFetch.TAG,"$ " + call.method);
         if (call.method.equalsIgnoreCase(ACTION_INITIALIZED)) {
-            sHeadlessTaskRegistered.set(true);
-            dispatch();
+            initialize();
         } else {
             result.notImplemented();
         }
+    }
+
+    private void initialize() {
+        synchronized (sOnInitializedListeners) {
+            if (!sOnInitializedListeners.isEmpty()) {
+                for (OnInitializedCallback callback : sOnInitializedListeners) {
+                    callback.onInitialized(sBackgroundFlutterEngine);
+                }
+                sOnInitializedListeners.clear();
+            }
+        }
+        sHeadlessTaskRegistered.set(true);
+        dispatch();
     }
 
     @Override
@@ -91,9 +108,10 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
         JSONObject response = new JSONObject();
         try {
             response.put("callbackId", mClientCallbackId);
+            response.put("taskId", mTaskId);
             sDispatchChannel.invokeMethod("", response);
         } catch (JSONException e) {
-            BackgroundFetch.getInstance(mContext).finish();
+            BackgroundFetch.getInstance(mContext).finish(mTaskId);
             Log.e(BackgroundFetch.TAG, e.getMessage());
             e.printStackTrace();
         }
@@ -118,7 +136,7 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
 
             if (callbackInfo == null) {
                 Log.e(BackgroundFetch.TAG, "Fatal: failed to find callback: " + mRegistrationCallbackId);
-                BackgroundFetch.getInstance(mContext).finish();
+                BackgroundFetch.getInstance(mContext).finish(mTaskId);
                 return;
             }
             DartExecutor.DartCallback dartCallback = new DartExecutor.DartCallback(assets, appBundlePath, callbackInfo);
@@ -180,5 +198,15 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
 
             BackgroundFetch.getUiHandler().post(HeadlessTask.this);
         }
+    }
+
+    public static void onInitialized(OnInitializedCallback callback) {
+        synchronized (sOnInitializedListeners) {
+            sOnInitializedListeners.add(callback);
+        }
+    }
+
+    public interface OnInitializedCallback {
+        void onInitialized(FlutterEngine engine);
     }
 }
