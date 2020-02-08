@@ -85,6 +85,7 @@ class _MyAppState extends State<MyApp> {
     // Configure BackgroundFetch.
     BackgroundFetch.configure(BackgroundFetchConfig(
         minimumFetchInterval: 15,
+        forceAlarmManager: false,
         stopOnTerminate: false,
         startOnBoot: true,
         enableHeadless: true,
@@ -98,6 +99,7 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         _status = status;
       });
+
     }).catchError((e) {
       print('[BackgroundFetch] configure ERROR: $e');
       setState(() {
@@ -105,6 +107,14 @@ class _MyAppState extends State<MyApp> {
       });
     });
 
+    BackgroundFetch.scheduleTask(TaskConfig(
+        taskId: "com.transistorsoft.customtask",
+        delay: 5000,
+        periodic: false,
+        forceAlarmManager: true,
+        stopOnTerminate: false,
+        enableHeadless: true
+    ));
 
 
     // Optionally query the current BackgroundFetch status.
@@ -130,9 +140,9 @@ class _MyAppState extends State<MyApp> {
     // Persist fetch events in SharedPreferences
     prefs.setString(EVENTS_KEY, jsonEncode(_events));
 
-    if (taskId == "com.transistorsoft.fetch") {
+    if (taskId == "flutter_background_fetch") {
       BackgroundFetch.scheduleTask(TaskConfig(
-          taskId: "foo",
+          taskId: "com.transistorsoft.customtask",
           delay: 5000,
           periodic: false,
           forceAlarmManager: true,

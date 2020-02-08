@@ -2,6 +2,8 @@
 #import <TSBackgroundFetch/TSBackgroundFetch.h>
 
 static NSString *const PLUGIN_PATH = @"com.transistorsoft/flutter_background_fetch";
+static NSString *const PLUGIN_ID = @"flutter_background_fetch";
+
 static NSString *const BACKGROUND_FETCH_TASK_ID = @"com.transistorsoft.fetch";
 
 static NSString *const METHOD_CHANNEL_NAME      = @"methods";
@@ -32,8 +34,7 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    
-    [[TSBackgroundFetch sharedInstance] registerBackgroundFetchTask:BACKGROUND_FETCH_TASK_ID];
+    [[TSBackgroundFetch sharedInstance] registerAppRefreshTask];    
     return YES;
 }
 
@@ -65,7 +66,7 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
     } else if ([self method:call.method is:ACTION_START]) {
         [self start:result];
     } else if ([self method:call.method is:ACTION_STOP]) {
-        [self stop:result];
+        [self stop:call.arguments result:result];
     } else if ([self method:call.method is:ACTION_STATUS]) {
         [self status:result];
     } else if ([self method:call.method is:ACTION_FINISH]) {
@@ -81,34 +82,42 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
 
 -(void) configure:(NSDictionary*)params result:(FlutterResult)result {
     TSBackgroundFetch *fetchManager = [TSBackgroundFetch sharedInstance];
-
-    [fetchManager configure:params callback:^(UIBackgroundRefreshStatus status) {
+                
+    [fetchManager addListener:PLUGIN_ID callback:[self createCallback]];
+    
+    NSTimeInterval delay = [[params objectForKey:@"minimumFetchInterval"] doubleValue] * 60;
+    [fetchManager configure:delay callback:^(UIBackgroundRefreshStatus status) {        
         if (status != UIBackgroundRefreshStatusAvailable) {
-            NSLog(@"- %@ failed to start, status: %lu", PLUGIN_PATH, (long)status);
+            NSLog(@"- %@ failed to start, status: %lu", PLUGIN_ID, (long)status);
             result([FlutterError errorWithCode: [NSString stringWithFormat:@"%lu", (long) status] message:nil details:@(status)]);
-            return;
+        } else {
+            result(@(status));
         }
-        [fetchManager addListener:BACKGROUND_FETCH_TASK_ID callback:[self createCallback]];
-        [fetchManager start:BACKGROUND_FETCH_TASK_ID];
-        result(@(status));
     }];
 }
 
 -(void) start:(FlutterResult)result {
     TSBackgroundFetch *fetchManager = [TSBackgroundFetch sharedInstance];
-    [fetchManager start:BACKGROUND_FETCH_TASK_ID callback:^(UIBackgroundRefreshStatus status) {
+                                      
+    [fetchManager status:^(UIBackgroundRefreshStatus status) {
         if (status == UIBackgroundRefreshStatusAvailable) {
-            result(@(status));
+            NSError *error = [fetchManager start:BACKGROUND_FETCH_TASK_ID];
+            if (!error) {
+                result(@(status));
+            } else {
+                result([FlutterError errorWithCode: [NSString stringWithFormat:@"%lu", (long) status] message:error.localizedFailureReason details:nil]);
+            }
         } else {
             NSLog(@"- %@ failed to start, status: %lu", PLUGIN_PATH, (long)status);
-            result([FlutterError errorWithCode: [NSString stringWithFormat:@"%lu", (long) status] message:nil details:@(status)]);
+            result([FlutterError errorWithCode: [NSString stringWithFormat:@"%lu", (long) status] message:@"disabled" details:@(status)]);
         }
     }];
 }
 
--(void) stop:(FlutterResult)result {
+-(void) stop:(NSString*)taskId result:(FlutterResult)result {
     TSBackgroundFetch *fetchManager = [TSBackgroundFetch sharedInstance];
-    [fetchManager stop:BACKGROUND_FETCH_TASK_ID];
+    if (!taskId) { taskId = BACKGROUND_FETCH_TASK_ID; }
+    [fetchManager stop:taskId];
     [self status:result];
 }
 
@@ -128,13 +137,16 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
     NSString *taskId = [config objectForKey:@"taskId"];
     long delayMS = [[config objectForKey:@"delay"] longValue];
     NSTimeInterval delay = delayMS / 1000;
-    
-    NSError *error = [[TSBackgroundFetch sharedInstance] scheduleTask:taskId delay:delay callback:[self createCallback]];
-    
+    BOOL periodic = [[config objectForKey:@"periodic"] boolValue];
+        
+    NSError *error = [[TSBackgroundFetch sharedInstance] scheduleProcessingTaskWithIdentifier:taskId
+                                                                                        delay:delay
+                                                                                     periodic:periodic
+                                                                                     callback:[self createCallback]];
     if (!error) {
         result(@(YES));
     } else {
-        result([FlutterError errorWithCode: [NSString stringWithFormat:@"%lu", (long) error.code] message:nil details:error.domain]);
+        result([FlutterError errorWithCode: [NSString stringWithFormat:@"%lu", (long) error.code] message:error.localizedFailureReason details:nil]);
     }
 }
 

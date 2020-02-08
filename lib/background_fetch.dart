@@ -173,7 +173,7 @@ class BackgroundFetchConfig extends _AbstractTaskConfig {
   int minimumFetchInterval;
 
   BackgroundFetchConfig(
-      {this.minimumFetchInterval,
+      {@required this.minimumFetchInterval,
       bool stopOnTerminate,
       bool startOnBoot,
       bool enableHeadless,

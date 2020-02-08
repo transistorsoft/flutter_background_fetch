@@ -4,7 +4,7 @@
 <dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>foo</string>
+		<string>com.transistorsoft.customtask</string>
 		<string>com.transistorsoft.fetch</string>
 	</array>
 	<key>CFBundleDevelopmentRegion</key>

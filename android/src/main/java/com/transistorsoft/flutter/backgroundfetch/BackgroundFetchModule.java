@@ -27,6 +27,7 @@ public class BackgroundFetchModule implements MethodCallHandler {
 
     public static final String TAG                          = "TSBackgroundFetch";
     static final String PLUGIN_ID                           = "com.transistorsoft/flutter_background_fetch";
+    static final String FETCH_TASK_ID                       = "flutter_background_fetch";
 
     private static final String METHOD_CHANNEL_NAME         = PLUGIN_ID + "/methods";
     private static final String EVENT_CHANNEL_NAME          = PLUGIN_ID + "/events";
@@ -115,13 +116,17 @@ public class BackgroundFetchModule implements MethodCallHandler {
 
     private void configure(Map<String, Object> params, Result result) {
         BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
-        adapter.configure(buildConfig(params), mFetchCallback);
+        adapter.configure(buildConfig(params).
+                setTaskId(FETCH_TASK_ID).
+                setIsFetchTask(true)
+                .build(), mFetchCallback);
+
         result.success(adapter.status());
     }
 
     private void start(Result result) {
         BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
-        adapter.start();
+        adapter.start(FETCH_TASK_ID);
         result.success(adapter.status());
     }
 
@@ -137,6 +142,7 @@ public class BackgroundFetchModule implements MethodCallHandler {
     }
 
     private void finish(String taskId, Result result) {
+        if (taskId == null) taskId = FETCH_TASK_ID;
         BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
 
         adapter.finish(taskId);
@@ -145,11 +151,11 @@ public class BackgroundFetchModule implements MethodCallHandler {
 
     private void scheduleTask(Map<String, Object> params, Result result) {
         BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
-        adapter.scheduleTask(buildConfig(params));
+        adapter.scheduleTask(buildConfig(params).build());
         result.success(true);
     }
 
-    private BackgroundFetchConfig buildConfig(Map<String, Object>params) {
+    private BackgroundFetchConfig.Builder buildConfig(Map<String, Object>params) {
         BackgroundFetchConfig.Builder config = new BackgroundFetchConfig.Builder();
 
         if (params.containsKey(BackgroundFetchConfig.FIELD_TASK_ID)) {
@@ -195,7 +201,7 @@ public class BackgroundFetchModule implements MethodCallHandler {
         if (params.containsKey("periodic")) {
             config.setPeriodic((boolean) params.get("periodic"));
         }
-        return config.build();
+        return config;
     }
 
     class FetchStreamHandler implements EventChannel.StreamHandler, BackgroundFetch.Callback {
