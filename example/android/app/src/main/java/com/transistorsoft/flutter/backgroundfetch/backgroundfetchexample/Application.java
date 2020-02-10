@@ -15,7 +15,7 @@ public class Application  extends FlutterApplication {
     @Override
     public void onCreate() {
 
-        // Strict mode.
+        /// Test Strict mode.
         /*
         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                 .detectDiskReads()
@@ -34,8 +34,10 @@ public class Application  extends FlutterApplication {
 
         super.onCreate();
 
-        Log.d("TSBackgroundFetch", "*********************** MainApplication");
-
+        ///
+        /// TEST onInitialized callback for custom MethodChannel
+        ///
+        /*
         HeadlessTask.onInitialized(new HeadlessTask.OnInitializedCallback() {
             @Override
             public void onInitialized(FlutterEngine engine) {
@@ -49,10 +51,7 @@ public class Application  extends FlutterApplication {
                 });
             }
         });
-
-
-        //MethodChannel(engine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
-        //        handleMethod(call, result, this)
+        */
 
     }
 }

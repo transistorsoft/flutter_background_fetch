@@ -42,7 +42,7 @@ __Note:__ The SDK *automatically* registers its required fetch-task **`com.trans
   .
   // [BackgroundFetch] Register your custom Background Processing task(s)
   TSBackgroundFetch *fetch = [TSBackgroundFetch sharedInstance];
-  [fetch registerBackgroundProcessingTask:@"com.foo.customtask"];
+  [fetch registerBGProcessingTask:@"com.foo.customtask"];
   .
   .
   .  

@@ -8,14 +8,11 @@ import 'package:background_fetch/background_fetch.dart';
 
 const EVENTS_KEY = "fetch_events";
 
-const MethodChannel _methodChannel = const MethodChannel("channel_foo");
-
 
 /// This "Headless Task" is run when app is terminated.
 void backgroundFetchHeadlessTask(String taskId) async {
   print("[BackgroundFetch] Headless event received: $taskId");
   DateTime timestamp = DateTime.now();
-  _methodChannel.invokeMethod('test');
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -32,17 +29,16 @@ void backgroundFetchHeadlessTask(String taskId) async {
 
   BackgroundFetch.finish(taskId);
 
-  /*
-  BackgroundFetch.scheduleTask(TaskConfig(
-      taskId: "foo",
-      delay: 5000,
-      periodic: false,
-      forceAlarmManager: true,
-      stopOnTerminate: false,
-      enableHeadless: true
-  ));
-
-   */
+  if (taskId == 'flutter_background_fetch') {
+    BackgroundFetch.scheduleTask(TaskConfig(
+        taskId: "foo",
+        delay: 5000,
+        periodic: false,
+        forceAlarmManager: true,
+        stopOnTerminate: false,
+        enableHeadless: true
+    ));
+  }
 }
 
 void main() {

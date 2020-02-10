@@ -101,7 +101,8 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
                                       
     [fetchManager status:^(UIBackgroundRefreshStatus status) {
         if (status == UIBackgroundRefreshStatusAvailable) {
-            NSError *error = [fetchManager start:BACKGROUND_FETCH_TASK_ID];
+            [fetchManager addListener:PLUGIN_ID callback:[self createCallback]];
+            NSError *error = [fetchManager start:PLUGIN_ID];
             if (!error) {
                 result(@(status));
             } else {
@@ -116,8 +117,12 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
 
 -(void) stop:(NSString*)taskId result:(FlutterResult)result {
     TSBackgroundFetch *fetchManager = [TSBackgroundFetch sharedInstance];
-    if (!taskId) { taskId = BACKGROUND_FETCH_TASK_ID; }
-    [fetchManager stop:taskId];
+    if (!taskId) {
+        [fetchManager removeListener:PLUGIN_ID];
+        [fetchManager stop:nil];
+    } else {
+        [fetchManager stop:taskId];
+    }
     [self status:result];
 }
 

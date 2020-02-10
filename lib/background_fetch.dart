@@ -52,9 +52,9 @@ class _AbstractTaskConfig {
   /// import 'package:background_fetch/background_fetch.dart';
   ///
   /// // This "Headless Task" is run when app is terminated.
-  /// void backgroundFetchHeadlessTask() async {
-  ///   print('[BackgroundFetch] Headless event received.');
-  ///   BackgroundFetch.finish();
+  /// void backgroundFetchHeadlessTask(String taskId) async {
+  ///   print("[BackgroundFetch] Headless event received: $taskId");
+  ///   BackgroundFetch.finish(taskId);
   /// }
   ///
   /// void main() {
@@ -365,7 +365,7 @@ class BackgroundFetch {
   ///   print('[BackgroundFetch] Event received.');
   ///   // IMPORTANT:  You must signal completion of your fetch task or the OS could punish your app for
   ///   // spending much time in the background.
-  ///   BackgroundFetch.finish(BackgroundFetch.FETCH_RESULT_NEW_DATA);
+  ///   BackgroundFetch.finish(taskId);
   /// })
   /// ```
   static Future<int> configure(
