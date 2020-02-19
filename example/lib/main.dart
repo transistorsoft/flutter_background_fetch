@@ -103,15 +103,17 @@ class _MyAppState extends State<MyApp> {
       });
     });
 
+    // Schedule a "one-shot" custom-task in 10000ms.
+    // These are fairly reliable on Android (particularly with forceAlarmManager) but not iOS,
+    // where device must be powered (and delay will be throttled by the OS).
     BackgroundFetch.scheduleTask(TaskConfig(
         taskId: "com.transistorsoft.customtask",
-        delay: 5000,
+        delay: 10000,
         periodic: false,
         forceAlarmManager: true,
         stopOnTerminate: false,
         enableHeadless: true
     ));
-
 
     // Optionally query the current BackgroundFetch status.
     int status = await BackgroundFetch.status;
@@ -137,6 +139,7 @@ class _MyAppState extends State<MyApp> {
     prefs.setString(EVENTS_KEY, jsonEncode(_events));
 
     if (taskId == "flutter_background_fetch") {
+      // Schedule a one-shot task when fetch event received (for testing).
       BackgroundFetch.scheduleTask(TaskConfig(
           taskId: "com.transistorsoft.customtask",
           delay: 5000,

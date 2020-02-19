@@ -11,7 +11,7 @@
 
 
 ## Configure `Info.plist`
-1.  Open your `Info.plist` and the key *"Permitted background task scheduler identifiers"*
+1.  Open your __`Info.plist`__ and add the key *"Permitted background task scheduler identifiers"*
 
 ![](https://dl.dropboxusercontent.com/s/t5xfgah2gghqtws/ios-setup-permitted-identifiers.png?dl=1)
 
@@ -19,34 +19,13 @@
 
 ![](https://dl.dropboxusercontent.com/s/kwdio2rr256d852/ios-setup-permitted-identifiers-add.png?dl=1)
 
-3.  If you intend to execute your own custom tasks via **`BackgroundFetch.scheduleTask`**, you must add those custom identifiers as well.  For example, if you intend to execute a custom **`taskId: 'com.foo.customtask'`**, you must add the identifier **`com.foo.customtask`** to your *"Permitted background task scheduler identifiers"*, as well.
+3.  If you intend to execute your own [custom tasks](#executing-custom-tasks) via **`BackgroundFetch.scheduleTask`**, you must add those custom identifiers as well.  For example, if you intend to execute a custom **`taskId: 'com.transistorsoft.customtask'`**, you must add the identifier **`com.transistorsoft.customtask`** to your *"Permitted background task scheduler identifiers"*, as well.
+
+:warning: A task identifier can be any string you wish, but it's a good idea to prefix them now with `com.transistorsoft.` &mdash;  In the future, the `com.transistorsoft` prefix **may become required**.
 
 ```dart
 BackgroundFetch.scheduleTask(TaskConfig(
-  taskId: 'com.foo.customtask',
+  taskId: 'com.transistorsoft.customtask',
   delay: 60 * 60 * 1000  //  In one hour (milliseconds) 
 ));
-```
-
-## `AppDelegate.m`
-
-**If** you added custom *Background Processing* identifier(s) in your `Info.plist` and intend to use **`BackgroundFetch.scheduleTask`**, you must register those custom identifier(s) in your **`AppDelegate`** method **`didFinishLaunchingWithOptions`**:
-
-__Note:__ The SDK *automatically* registers its required fetch-task **`com.transistorsoft.fetch`** &mdash; You need only register **your own** custom task idenfifiers here.
-
-```obj-c
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  [GeneratedPluginRegistrant registerWithRegistry:self];
-  .
-  .
-  .
-  // [BackgroundFetch] Register your custom Background Processing task(s)
-  TSBackgroundFetch *fetch = [TSBackgroundFetch sharedInstance];
-  [fetch registerBGProcessingTask:@"com.foo.customtask"];
-  .
-  .
-  .  
-  return [super application:application didFinishLaunchingWithOptions:launchOptions];
-}
-
 ```

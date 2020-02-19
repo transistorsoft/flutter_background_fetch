@@ -8,11 +8,15 @@ By [**Transistor Software**](http://transistorsoft.com), creators of [**Flutter 
 
 Background Fetch is a *very* simple plugin which will awaken an app in the background about **every 15 minutes**, providing a short period of background running-time.  This plugin will execute your provided `callbackFn` whenever a background-fetch event occurs.
 
+:new: Background Fetch now provides a [__`scheduleTask`__](#executing-custom-tasks) method for scheduling arbitrary "one-shot" or periodic tasks.
+
 ### iOS
-There is **no way** to increase the rate which a fetch-event occurs and this plugin sets the rate to the most frequent possible &mdash; you will **never** receive an event faster than **15 minutes**.  The operating-system will automatically throttle the rate the background-fetch events occur based upon usage patterns.  Eg: if user hasn't turned on their phone for a long period of time, fetch events will occur less frequently.
+- There is **no way** to increase the rate which a fetch-event occurs and this plugin sets the rate to the most frequent possible &mdash; you will **never** receive an event faster than **15 minutes**.  The operating-system will automatically throttle the rate the background-fetch events occur based upon usage patterns.  Eg: if user hasn't turned on their phone for a long period of time, fetch events will occur less frequently.
+- [__`scheduleTask`__](#executing-custom-tasks) seems only to fire when the device is plugged into power. 
 
 ### Android
-The Android plugin provides a [Headless](https://pub.dartlang.org/documentation/background_fetch/latest/background_fetch/BackgroundFetchConfig/enableHeadless.html) implementation allowing you to continue handling events even after app-termination.
+- The Android plugin provides a [Headless](https://pub.dartlang.org/documentation/background_fetch/latest/background_fetch/BackgroundFetchConfig/enableHeadless.html) implementation allowing you to continue handling events even after app-termination.
+ 
 
 # Contents
 
@@ -29,7 +33,7 @@ The Android plugin provides a [Headless](https://pub.dartlang.org/documentation/
 
 ```yaml
 dependencies:
-  background_fetch: '^0.5.0'
+  background_fetch: '^0.5.1'
 ```
 
 ### Or latest from Git:
@@ -214,7 +218,7 @@ BackgroundFetch.configure(BackgroundFetchConfig(
   
   // Use a switch statement to route task-handling.
   switch (taskId) {
-    case 'com.foo.customtask':
+    case 'com.transistorsoft.customtask':
       print("Received custom task");
       break;
     default:
@@ -224,9 +228,9 @@ BackgroundFetch.configure(BackgroundFetchConfig(
   BackgroundFetch.finish(taskId);
 });
 
-// Step 2:  Schedule a custom "oneshot" task "com.foo.customtask" to execute 5000ms from now.
+// Step 2:  Schedule a custom "oneshot" task "com.transistorsoft.customtask" to execute 5000ms from now.
 BackgroundFetch.scheduleTask(TaskConfig(
-  taskId: "com.foo.customtask",
+  taskId: "com.transistorsoft.customtask",
   delay: 5000  // <-- milliseconds
 ));
 ```
@@ -235,21 +239,21 @@ BackgroundFetch.scheduleTask(TaskConfig(
 
 ### iOS
 
-#### New `BGTaskScheduler` API for iOS 13+
-- The old command *Debug->Simulate Background Fetch* no longer works with new `BGTaskSCheduler` API. 
-- At the time of writing, the new task simulator does not yet work in Simulator; Only real devices.
+#### :new: `BGTaskScheduler` API for iOS 13+
+
+- :warning: At the time of writing, the new task simulator does not yet work in Simulator; Only real devices.
 - See Apple docs [Starting and Terminating Tasks During Development](https://developer.apple.com/documentation/backgroundtasks/starting_and_terminating_tasks_during_development?language=objc)
 - After running your app in XCode, Click the `[||]` button to initiate a *Breakpoint*.
-
-![](https://dl.dropboxusercontent.com/s/zr7w3g8ivf71u32/ios-simulate-bgtask-pause.png?dl=1)
-
 - In the console `(lldb)`, paste the following command (**Note:**  use cursor up/down keys to cycle through previously run commands):
 ```obj-c
 e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"com.transistorsoft.fetch"]
 ```
-![](https://dl.dropboxusercontent.com/s/87c9uctr1ka3s1e/ios-simulate-bgtask-paste.png?dl=1)
-
 - Click the `[ > ]` button to continue.  The task will execute and the Callback function provided to **`BackgroundFetch.configure`** will receive the event.
+
+
+![](https://dl.dropboxusercontent.com/s/zr7w3g8ivf71u32/ios-simulate-bgtask-pause.png?dl=1)
+
+![](https://dl.dropboxusercontent.com/s/87c9uctr1ka3s1e/ios-simulate-bgtask-paste.png?dl=1)
 
 ![](https://dl.dropboxusercontent.com/s/bsv0avap5c2h7ed/ios-simulate-bgtask-play.png?dl=1)
  

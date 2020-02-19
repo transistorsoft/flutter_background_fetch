@@ -28,13 +28,12 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
 -(BOOL)application:(UIApplication *)application performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 {
     NSLog(@"BackgroundFetch AppDelegate received fetch event");
-    TSBackgroundFetch *fetchManager = [TSBackgroundFetch sharedInstance];
-    [fetchManager performFetchWithCompletionHandler:completionHandler applicationState:application.applicationState];
+    [[TSBackgroundFetch sharedInstance] performFetchWithCompletionHandler:completionHandler applicationState:application.applicationState];
     return YES;
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    [[TSBackgroundFetch sharedInstance] registerAppRefreshTask];    
+    [[TSBackgroundFetch sharedInstance] didFinishLaunching];
     return YES;
 }
 
@@ -118,11 +117,11 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
 -(void) stop:(NSString*)taskId result:(FlutterResult)result {
     TSBackgroundFetch *fetchManager = [TSBackgroundFetch sharedInstance];
     if (!taskId) {
+        // Remove fetch listener.
         [fetchManager removeListener:PLUGIN_ID];
-        [fetchManager stop:nil];
-    } else {
-        [fetchManager stop:taskId];
     }
+    // Calling stop with nil taskId will cause TSBackgroundFetch to stop all custom-tasks from #scheduleTask
+    [fetchManager stop:taskId];
     [self status:result];
 }
 

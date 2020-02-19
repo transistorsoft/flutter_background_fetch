@@ -8,9 +8,7 @@
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [GeneratedPluginRegistrant registerWithRegistry:self];
   // Override point for customization after application launch.
-  TSBackgroundFetch *fetch = [TSBackgroundFetch sharedInstance];
-  [fetch registerBGProcessingTask:@"com.transistorsoft.customtask"];
-    
+      
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
