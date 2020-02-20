@@ -1,3 +1,6 @@
+## 0.5.2 - 2020-02-20
+* [Android] Fix Android NPE in `hasTaskId` for case where plugin is installed first time in had previous version of plugin
+
 ## 0.5.1 - 2020-02-19
 
 ## Minor Breaking Change for iOS Setup 
