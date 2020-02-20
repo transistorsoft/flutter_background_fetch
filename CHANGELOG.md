@@ -1,4 +1,12 @@
-## 0.5.0 - 2020-01-03
+## 0.5.1 - 2020-02-19
+
+## Minor Breaking Change for iOS Setup 
+
+* [iOS] It's no longer necessary to `registerBGProcessingTask` in `AppDelegate.m` for tasks registered for use with `#scheduleTask`.  The SDK now reads the App `.plist` and automatically registers those tasks found in  *"Permitted background task scheduler identifiers"*.  Remove **all** code in your `AppDelegate.m` that references `TSBackgroundFetch`.
+![](https://dl.dropboxusercontent.com/s/t5xfgah2gghqtws/ios-setup-permitted-identifiers.png?dl=1)
+
+
+## 0.5.0 - 2020-02-03
 * [Added] [Android] New option `forceAlarmManager` for bypassing `JobScheduler` mechanism in favour of `AlarmManager` for more precise scheduling task execution.
 * [Changed] Migrate iOS deprecated "background-fetch" API to new [BGTaskScheduler](https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler?language=objc).  See new required steps in iOS Setup.
 * [Added] Added new `BackgroundFetch.scheduleTask` method for scheduling custom "onehot" and periodic tasks in addition to the default fetch-task.
