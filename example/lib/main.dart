@@ -31,7 +31,7 @@ void backgroundFetchHeadlessTask(String taskId) async {
 
   if (taskId == 'flutter_background_fetch') {
     BackgroundFetch.scheduleTask(TaskConfig(
-        taskId: "foo",
+        taskId: "com.transistorsoft.customtask",
         delay: 5000,
         periodic: false,
         forceAlarmManager: true,

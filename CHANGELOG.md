@@ -1,3 +1,6 @@
+## 0.5.3 - 2020-02-21
+* [Fixed] [Android] `stopOnTerminate` not cancelling scheduled job / Alarm when fired task fired after terminate.
+
 ## 0.5.2 - 2020-02-20
 * [Android] Fix Android NPE in `hasTaskId` for case where plugin is installed first time in had previous version of plugin
 
