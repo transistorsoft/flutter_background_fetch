@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.util.Log;
 
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
 import com.transistorsoft.tsbackgroundfetch.BackgroundFetch;
@@ -26,6 +27,7 @@ import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.view.FlutterCallbackInformation;
 import io.flutter.view.FlutterMain;
 
+@Keep
 public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
     private static final String KEY_REGISTRATION_CALLBACK_ID    = "registrationCallbackId";
     private static final String KEY_CLIENT_CALLBACK_ID          = "clientCallbackId";
