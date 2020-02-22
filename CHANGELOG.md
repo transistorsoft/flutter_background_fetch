@@ -1,3 +1,7 @@
+## 0.5.4 - 2020-02-22
+
+* [Fixed] [Android] Add `@Keep` annotation to `HeadlessTask.java` to prevent minifying this classs in release builds since the SDK uses reflection to find this class.
+
 ## 0.5.3 - 2020-02-21
 * [Fixed] [Android] `stopOnTerminate` not cancelling scheduled job / Alarm when fired task fired after terminate.
 
