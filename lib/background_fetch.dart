@@ -118,6 +118,18 @@ class _AbstractTaskConfig {
   ///
   bool requiresDeviceIdle;
 
+  ///
+  /// [iOS only] When set true, ensure that this job will run only when device is connected to power.
+  ///
+  /// The default state is false: that is, the job can run even if device is not currently connected to power.
+  bool requiresExternalPower;
+
+  ///
+  /// [iOS only] When set true, ensure that this job will run only when device is has network connectivity.
+  ///
+  /// The default state is false: that is, the job can run even if device does not have network connectivity.
+  bool requiresNetworkConnectivity;
+
   _AbstractTaskConfig(
       {this.stopOnTerminate,
       this.startOnBoot,
@@ -127,7 +139,9 @@ class _AbstractTaskConfig {
       this.requiresBatteryNotLow,
       this.requiresStorageNotLow,
       this.requiresCharging,
-      this.requiresDeviceIdle});
+      this.requiresDeviceIdle,
+      this.requiresExternalPower = false,
+      this.requiresNetworkConnectivity = false});
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> config = {};
@@ -145,6 +159,8 @@ class _AbstractTaskConfig {
     if (requiresCharging != null) config['requiresCharging'] = requiresCharging;
     if (requiresDeviceIdle != null)
       config['requiresDeviceIdle'] = requiresDeviceIdle;
+    config['requiresExternalPower'] = requiresExternalPower;
+    config['requiresNetworkConnectivity'] = requiresNetworkConnectivity;
     return config;
   }
 }
@@ -225,6 +241,8 @@ class TaskConfig extends _AbstractTaskConfig {
     bool requiresStorageNotLow,
     bool requiresCharging,
     bool requiresDeviceIdle,
+    bool requiresExternalPower,
+    bool requiresNetworkConnectivity,
   }) : super(
             stopOnTerminate: stopOnTerminate,
             startOnBoot: startOnBoot,
@@ -234,13 +252,17 @@ class TaskConfig extends _AbstractTaskConfig {
             requiresBatteryNotLow: requiresBatteryNotLow,
             requiresStorageNotLow: requiresStorageNotLow,
             requiresCharging: requiresCharging,
-            requiresDeviceIdle: requiresDeviceIdle);
+            requiresDeviceIdle: requiresDeviceIdle,
+            requiresExternalPower: requiresExternalPower,
+            requiresNetworkConnectivity: requiresNetworkConnectivity);
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> config = super.toMap();
     config['taskId'] = this.taskId;
     config['delay'] = this.delay;
     config['periodic'] = this.periodic;
+    config['requiresExternalPower'] = this.requiresExternalPower;
+    config['requiresNetworkConnectivity'] = this.requiresNetworkConnectivity;
     return config;
   }
 }
