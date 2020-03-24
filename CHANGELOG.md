@@ -1,3 +1,6 @@
+## 0.5.5 - 2020-03-24
+* [Fixed] [iOS] bug with `start` plugin after executing `stop`.
+
 ## 0.5.4 - 2020-02-22
 
 * [Fixed] [Android] Add `@Keep` annotation to `HeadlessTask.java` to prevent minifying this classs in release builds since the SDK uses reflection to find this class.
