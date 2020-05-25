@@ -1,3 +1,7 @@
+## Unreleased
+* [Fixed][Android] using `forceAlarmManager: true` fails to restart fetch events after reboot.
+* [Fixed] Android check `wakeLock.isHeld()` before executing `wakeLock.release()`.
+
 ## 0.5.5 - 2020-03-24
 * [Fixed] [iOS] bug with `start` plugin after executing `stop`.
 
