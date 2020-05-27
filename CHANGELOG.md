@@ -1,4 +1,4 @@
-## Unreleased
+## 0.5.6
 * [Fixed][Android] using `forceAlarmManager: true` fails to restart fetch events after reboot.
 * [Fixed] Android check `wakeLock.isHeld()` before executing `wakeLock.release()`.
 
