@@ -53,7 +53,7 @@ buildscript {
 +   ext {
 +       compileSdkVersion   = 28                // or higher
 +       targetSdkVersion    = 28                // or higher
-+       appCompatVersion    = "1.0.2"           // or higher
++       appCompatVersion    = "1.1.0"           // or higher
 +   }
 
     repositories {
@@ -66,6 +66,16 @@ buildscript {
     }
 }
 
+allprojects {
+    repositories {
+        google()
+        jcenter()
++       maven {
++           // [required] background_fetch
++           url "${project(':background_fetch').projectDir}/libs"
++       }
+    }
+}
 ```
 
 ## `android/app/build.gradle`

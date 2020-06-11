@@ -1,3 +1,19 @@
+## 0.6.0 - 2020-06-11
+* [Fixed][Android] `com.android.tools.build:gradle:4.0.0` no longer allows "*direct local aar dependencies*".  The Android Setup now requires a custom __`maven url`__ to be added to your app's root __`android/build.gradle`__:
+
+```diff
+allprojects {
+    repositories {
+        google()
+        jcenter()
++       maven {
++           // [required] background_fetch
++           url "${project(':background_fetch').projectDir}/libs"
++       }
+    }
+}
+```
+
 ## 0.5.6
 * [Fixed][Android] using `forceAlarmManager: true` fails to restart fetch events after reboot.
 * [Fixed] Android check `wakeLock.isHeld()` before executing `wakeLock.release()`.
