@@ -2,7 +2,7 @@
 
 [![](https://dl.dropboxusercontent.com/s/nm4s5ltlug63vv8/logo-150-print.png?dl=1)](https://www.transistorsoft.com)
 
-By [**Transistor Software**](http://transistorsoft.com), creators of [**Flutter Background Geolocation**](http://www.transistorsoft.com/shop/products/flutter-background-geolocation)
+By [**Transistor Software**](https://www.transistorsoft.com), creators of [**Flutter Background Geolocation**](https://www.transistorsoft.com/shop/products/flutter-background-geolocation)
 
 ------------------------------------------------------------------------------
 
@@ -12,11 +12,11 @@ Background Fetch is a *very* simple plugin which will awaken an app in the backg
 
 ### iOS
 - There is **no way** to increase the rate which a fetch-event occurs and this plugin sets the rate to the most frequent possible &mdash; you will **never** receive an event faster than **15 minutes**.  The operating-system will automatically throttle the rate the background-fetch events occur based upon usage patterns.  Eg: if user hasn't turned on their phone for a long period of time, fetch events will occur less frequently.
-- [__`scheduleTask`__](#executing-custom-tasks) seems only to fire when the device is plugged into power. 
+- [__`scheduleTask`__](#executing-custom-tasks) seems only to fire when the device is plugged into power.
 
 ### Android
 - The Android plugin provides a [Headless](https://pub.dartlang.org/documentation/background_fetch/latest/background_fetch/BackgroundFetchConfig/enableHeadless.html) implementation allowing you to continue handling events even after app-termination.
- 
+
 
 # Contents
 
@@ -201,7 +201,7 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
-} 
+}
 ```
 
 ### Executing Custom Tasks
@@ -211,11 +211,11 @@ In addition to the default background-fetch task defined by `BackgroundFetch.con
 ```dart
 // Step 1:  Configure BackgroundFetch as usual.
 BackgroundFetch.configure(BackgroundFetchConfig(
-  minimumFetchInterval: 15  
+  minimumFetchInterval: 15
 ), (String taskId) async {
   // This is the fetch-event callback.
   print("[BackgroundFetch] taskId: $taskId");
-  
+
   // Use a switch statement to route task-handling.
   switch (taskId) {
     case 'com.transistorsoft.customtask':
@@ -256,7 +256,7 @@ e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWith
 ![](https://dl.dropboxusercontent.com/s/87c9uctr1ka3s1e/ios-simulate-bgtask-paste.png?dl=1)
 
 ![](https://dl.dropboxusercontent.com/s/bsv0avap5c2h7ed/ios-simulate-bgtask-play.png?dl=1)
- 
+
 #### Old `BackgroundFetch` API
 - Simulate background fetch events in XCode using **`Debug->Simulate Background Fetch`**
 - iOS can take some hours or even days to start a consistently scheduling background-fetch events since iOS schedules fetch events based upon the user's patterns of activity.  If *Simulate Background Fetch* works, your can be **sure** that everything is working fine.  You just need to wait.
@@ -298,7 +298,7 @@ Unlike iOS, the Android implementation *can* continue to operate after applicati
 The MIT License
 
 Copyright (c) 2018 Chris Scott, Transistor Software <chris@transistorsoft.com>
-http://transistorsoft.com
+https://www.transistorsoft.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
