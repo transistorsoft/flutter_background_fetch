@@ -140,6 +140,8 @@ class Application : FlutterApplication(), PluginRegistry.PluginRegistrantCallbac
 
   override fun registerWith(registry: PluginRegistry) {
     GeneratedPluginRegistrant.registerWith(registry);
+    //If you are using Flutter (Channel master, 1.20.0-1.0.pre.81, on Microsoft Windows [Version
+    //10.0.18363.900], locale en-US) this will GeneratedPluginRegistrant.registerWith(registry) will not work you must replace     //with GeneratedPluginRegistrant.registerWith((FlutterEngine) registry);
   }
 }
 ```
