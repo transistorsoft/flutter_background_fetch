@@ -1,5 +1,26 @@
 group 'com.transistorsoft.flutter.backgroundfetch'
 version '1.0-SNAPSHOT'
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.0.0'
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven {
+            url './libs'
+        }
+    }
+}
+
 apply plugin: 'com.android.library'
 
 def safeExtGet(prop, fallback) {
@@ -18,13 +39,7 @@ android {
     }
 }
 
-repositories {
-    maven {
-        url './libs'
-    }
-}
-
 dependencies {
-    implementation fileTree(include: '*.aar', dir: 'libs')
-    implementation "androidx.appcompat:appcompat:${safeExtGet('appCompatVersion', "1.0.2")}"
+    implementation(group: 'com.transistorsoft', name:'tsbackgroundfetch', version: '+')
+    implementation "androidx.appcompat:appcompat:${safeExtGet('appCompatVersion', "1.1.0")}"
 }

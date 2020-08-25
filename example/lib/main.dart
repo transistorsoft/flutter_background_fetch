@@ -21,6 +21,7 @@ void backgroundFetchHeadlessTask(String taskId) async {
   String json = prefs.getString(EVENTS_KEY);
   if (json != null) {
     events = jsonDecode(json).cast<String>();
+
   }
   // Add new event.
   events.insert(0, "$taskId@$timestamp [Headless]");
