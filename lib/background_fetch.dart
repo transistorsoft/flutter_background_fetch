@@ -105,7 +105,9 @@ class _AbstractTaskConfig {
   bool requiresStorageNotLow;
 
   ///
-  /// [Android only] Specify that to run this job, the device must be charging (or be a non-battery-powered device connected to permanent power, such as Android TV devices). This defaults to false.
+  /// Specify that to run this job, the device must be charging (or be a non-battery-powered device connected to permanent power, such as Android TV devices). This defaults to [false].
+  /// 
+  /// This will use the [requiresCharging] param on Android and [requiresExternalPower] param on iOS.
   ///
   bool requiresCharging;
 
@@ -118,6 +120,12 @@ class _AbstractTaskConfig {
   ///
   bool requiresDeviceIdle;
 
+  ///
+  /// [iOS only] When set true, ensure that this job will run only when device is has network connectivity.
+  ///
+  /// The default state is false: that is, the job can run even if device does not have network connectivity.
+  bool requiresNetworkConnectivity;
+
   _AbstractTaskConfig(
       {this.stopOnTerminate,
       this.startOnBoot,
@@ -127,7 +135,8 @@ class _AbstractTaskConfig {
       this.requiresBatteryNotLow,
       this.requiresStorageNotLow,
       this.requiresCharging,
-      this.requiresDeviceIdle});
+      this.requiresDeviceIdle,
+      this.requiresNetworkConnectivity = false});
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> config = {};
@@ -145,6 +154,7 @@ class _AbstractTaskConfig {
     if (requiresCharging != null) config['requiresCharging'] = requiresCharging;
     if (requiresDeviceIdle != null)
       config['requiresDeviceIdle'] = requiresDeviceIdle;
+    config['requiresNetworkConnectivity'] = requiresNetworkConnectivity ?? false;
     return config;
   }
 }
@@ -225,6 +235,8 @@ class TaskConfig extends _AbstractTaskConfig {
     bool requiresStorageNotLow,
     bool requiresCharging,
     bool requiresDeviceIdle,
+    bool requiresExternalPower,
+    bool requiresNetworkConnectivity,
   }) : super(
             stopOnTerminate: stopOnTerminate,
             startOnBoot: startOnBoot,
@@ -234,13 +246,16 @@ class TaskConfig extends _AbstractTaskConfig {
             requiresBatteryNotLow: requiresBatteryNotLow,
             requiresStorageNotLow: requiresStorageNotLow,
             requiresCharging: requiresCharging,
-            requiresDeviceIdle: requiresDeviceIdle);
+            requiresDeviceIdle: requiresDeviceIdle,
+            requiresNetworkConnectivity: requiresNetworkConnectivity);
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> config = super.toMap();
     config['taskId'] = this.taskId;
     config['delay'] = this.delay;
     config['periodic'] = this.periodic;
+    config['requiresCharging'] = this.requiresCharging ?? false;
+    config['requiresNetworkConnectivity'] = this.requiresNetworkConnectivity ?? false;
     return config;
   }
 }

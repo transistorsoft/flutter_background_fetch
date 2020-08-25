@@ -142,10 +142,14 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
     long delayMS = [[config objectForKey:@"delay"] longValue];
     NSTimeInterval delay = delayMS / 1000;
     BOOL periodic = [[config objectForKey:@"periodic"] boolValue];
+    BOOL requiresExternalPower = [[config objectForKey:@"requiresCharging"] boolValue];
+    BOOL requiresNetworkConnectivity = [[config objectForKey:@"requiresNetworkConnectivity"] boolValue];
         
     NSError *error = [[TSBackgroundFetch sharedInstance] scheduleProcessingTaskWithIdentifier:taskId
                                                                                         delay:delay
                                                                                      periodic:periodic
+                                                                                     requiresExternalPower:requiresExternalPower
+                                                                                     requiresNetworkConnectivity:requiresNetworkConnectivity
                                                                                      callback:[self createCallback]];
     if (!error) {
         result(@(YES));
