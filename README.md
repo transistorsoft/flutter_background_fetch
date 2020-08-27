@@ -21,11 +21,13 @@ Background Fetch is a *very* simple plugin which will awaken an app in the backg
 # Contents
 
 - ### 📚 [API Documentation](https://pub.dartlang.org/documentation/background_fetch/latest/background_fetch/BackgroundFetch-class.html)
-- ### [Installing the Plugin](#large_blue_diamond-installing-the-plugin)
-- ### [Setup Guides](#large_blue_diamond-setup-guides)
-- ### [Example](#large_blue_diamond-example)
-- ### [Debugging](#large_blue_diamond-debugging)
-- ### [Demo Application](#large_blue_diamond-demo-application)
+- ### [Installing the Plugin](#-installing-the-plugin)
+- ### [Setup Guides](#-setup-guides)
+- ### [Example](#-example)
+- ### [Debugging](#-debugging)
+- ### [Demo Application](#-demo-application)
+- ### [Implementation](#-implementation)
+- ### [Licence](#-licence)
 
 ## 🔷 Installing the plugin
 
