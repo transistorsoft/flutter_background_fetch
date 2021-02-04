@@ -30,13 +30,13 @@ enum NetworkType {
 ///
 class _AbstractTaskConfig {
   /// __Android only__: Set `false` to continue background-fetch events after user terminates the app. Default to `true`.
-  bool stopOnTerminate;
+  bool? stopOnTerminate;
 
   /// __Android only__: Set `true` to initiate background-fetch events when the device is rebooted. Defaults to `false`.
   ///
   /// ❗ NOTE: [startOnBoot] requires [stopOnTerminate]: `false`.
   ///
-  bool startOnBoot;
+  bool? startOnBoot;
 
   /// __Android only__: Set true to enable the Headless mechanism, for handling fetch events after app termination.
   ///
@@ -67,12 +67,12 @@ class _AbstractTaskConfig {
   ///   BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
   /// }
   /// ```
-  bool enableHeadless;
+  bool? enableHeadless;
 
   /// __Android only__: Set true to force Task to use Android `AlarmManager` mechanism rather than `JobScheduler`.
   /// Defaults to `false`.  Will result in more precise scheduling of tasks **at the cost of higher battery usage.**
   ///
-  bool forceAlarmManager;
+  bool? forceAlarmManager;
 
   /// [Android only] Set detailed description of the kind of network your job requires.
   ///
@@ -88,26 +88,26 @@ class _AbstractTaskConfig {
   ///	| [NetworkType.UNMETERED]   | This job requires network connectivity that is unmetered.            |
   ///	| [NetworkType.NOT_ROAMING] | This job requires network connectivity that is not roaming.          |
   ///
-  NetworkType requiredNetworkType;
+  NetworkType? requiredNetworkType;
 
   ///
   /// [Android only] Specify that to run this job, the device's battery level must not be low.
   ///
   ///This defaults to false. If true, the job will only run when the battery level is not low, which is generally the point where the user is given a "low battery" warning.
   ///
-  bool requiresBatteryNotLow;
+  bool? requiresBatteryNotLow;
 
   ///
   /// [Android only] Specify that to run this job, the device's available storage must not be low.
   ///
   /// This defaults to false. If true, the job will only run when the device is not in a low storage state, which is generally the point where the user is given a "low storage" warning.
   ///
-  bool requiresStorageNotLow;
+  bool? requiresStorageNotLow;
 
   ///
   /// [Android only] Specify that to run this job, the device must be charging (or be a non-battery-powered device connected to permanent power, such as Android TV devices). This defaults to false.
   ///
-  bool requiresCharging;
+  bool? requiresCharging;
 
   ///
   /// [Android only] When set true, ensure that this job will not run if the device is in active use.
@@ -116,7 +116,7 @@ class _AbstractTaskConfig {
   ///
   /// This state is a loose definition provided by the system. In general, it means that the device is not currently being used interactively, and has not been in use for some time. As such, it is a good time to perform resource heavy jobs. Bear in mind that battery usage will still be attributed to your application, and surfaced to the user in battery stats.
   ///
-  bool requiresDeviceIdle;
+  bool? requiresDeviceIdle;
 
   _AbstractTaskConfig(
       {this.stopOnTerminate,
@@ -137,7 +137,8 @@ class _AbstractTaskConfig {
     if (forceAlarmManager != null)
       config['forceAlarmManager'] = forceAlarmManager;
     if (requiredNetworkType != null)
-      config['requiredNetworkType'] = requiredNetworkType.index;
+      // https://stackoverflow.com/questions/65456958/dart-null-safety-doesnt-work-with-class-fields
+      config['requiredNetworkType'] = requiredNetworkType?.index;
     if (requiresBatteryNotLow != null)
       config['requiresBatteryNotLow'] = requiresBatteryNotLow;
     if (requiresStorageNotLow != null)
@@ -173,16 +174,16 @@ class BackgroundFetchConfig extends _AbstractTaskConfig {
   int minimumFetchInterval;
 
   BackgroundFetchConfig(
-      {@required this.minimumFetchInterval,
-      bool stopOnTerminate,
-      bool startOnBoot,
-      bool enableHeadless,
-      bool forceAlarmManager,
-      NetworkType requiredNetworkType,
-      bool requiresBatteryNotLow,
-      bool requiresStorageNotLow,
-      bool requiresCharging,
-      bool requiresDeviceIdle})
+      {required this.minimumFetchInterval,
+      bool? stopOnTerminate,
+      bool? startOnBoot,
+      bool? enableHeadless,
+      bool? forceAlarmManager,
+      NetworkType? requiredNetworkType,
+      bool? requiresBatteryNotLow,
+      bool? requiresStorageNotLow,
+      bool? requiresCharging,
+      bool? requiresDeviceIdle})
       : super(
             stopOnTerminate: stopOnTerminate,
             startOnBoot: startOnBoot,
@@ -196,7 +197,6 @@ class BackgroundFetchConfig extends _AbstractTaskConfig {
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> config = super.toMap();
-    if (minimumFetchInterval != null)
       config['minimumFetchInterval'] = minimumFetchInterval;
     return config;
   }
@@ -213,18 +213,18 @@ class TaskConfig extends _AbstractTaskConfig {
   bool periodic;
 
   TaskConfig({
-    @required this.taskId,
-    @required this.delay,
+    required this.taskId,
+    required this.delay,
     this.periodic = false,
-    bool stopOnTerminate,
-    bool startOnBoot,
-    bool enableHeadless,
-    bool forceAlarmManager,
-    NetworkType requiredNetworkType,
-    bool requiresBatteryNotLow,
-    bool requiresStorageNotLow,
-    bool requiresCharging,
-    bool requiresDeviceIdle,
+    bool? stopOnTerminate,
+    bool? startOnBoot,
+    bool? enableHeadless,
+    bool? forceAlarmManager,
+    NetworkType? requiredNetworkType,
+    bool? requiresBatteryNotLow,
+    bool? requiresStorageNotLow,
+    bool? requiresCharging,
+    bool? requiresDeviceIdle,
   }) : super(
             stopOnTerminate: stopOnTerminate,
             startOnBoot: startOnBoot,
@@ -351,7 +351,7 @@ class BackgroundFetch {
   static const EventChannel _eventChannel =
       const EventChannel(_EVENT_CHANNEL_NAME);
 
-  static Stream<dynamic> _eventsFetch;
+  static Stream<dynamic>? _eventsFetch;
 
   /// Configures the plugin's [BackgroundFetchConfig] and `callback` Function. This `callback` will fire each time a background-fetch event occurs (typically every 15 min).
   ///
@@ -373,7 +373,7 @@ class BackgroundFetch {
     if (_eventsFetch == null) {
       _eventsFetch = _eventChannel.receiveBroadcastStream();
 
-      _eventsFetch.listen((dynamic v) {
+      _eventsFetch?.listen((dynamic v) {
         callback(v);
       });
     }
@@ -387,7 +387,7 @@ class BackgroundFetch {
       completer.completeError(e.details);
     });
 
-    return completer.future;
+    return completer.future as Future<int>;
   }
 
   /// Start the background-fetch API.
@@ -401,7 +401,7 @@ class BackgroundFetch {
     }).catchError((dynamic e) {
       completer.completeError(e.details);
     });
-    return completer.future;
+    return completer.future as Future<int>;
   }
 
   /// Stop the background-fetch API from firing events.
@@ -433,7 +433,7 @@ class BackgroundFetch {
   /// BackgroundFetch.stop();
   ///
   ///
-  static Future<int> stop([String taskId]) async {
+  static Future<int> stop([String? taskId]) async {
     int status = await _methodChannel.invokeMethod('stop', taskId);
     return status;
   }
@@ -579,9 +579,9 @@ class BackgroundFetch {
 
     // Two callbacks:  the provided headless-task + _headlessRegistrationCallback
     List<int> args = [
-      PluginUtilities.getCallbackHandle(_headlessCallbackDispatcher)
+      PluginUtilities.getCallbackHandle(_headlessCallbackDispatcher)!
           .toRawHandle(),
-      PluginUtilities.getCallbackHandle(callback).toRawHandle()
+      PluginUtilities.getCallbackHandle(callback)!.toRawHandle()
     ];
 
     _methodChannel
@@ -593,7 +593,7 @@ class BackgroundFetch {
       print('[BackgroundFetch registerHeadlessTask] ‼️ $message');
       completer.complete(false);
     });
-    return completer.future;
+    return completer.future as Future<bool>;
   }
 }
 
@@ -609,7 +609,7 @@ void _headlessCallbackDispatcher() {
 
     // Run the headless-task.
     try {
-      final Function callback = PluginUtilities.getCallbackFromHandle(
+      final Function? callback = PluginUtilities.getCallbackFromHandle(
           CallbackHandle.fromRawHandle(args['callbackId']));
       if (callback == null) {
         print(
