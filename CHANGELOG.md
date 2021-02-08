@@ -1,3 +1,13 @@
+## 0.7.0 - 2021-02-09
+* [Fixed][iOS] Migrate TSBackgroundFetch.framework to new .xcframework for MacCatalyst support with new Apple silcon.
+
+:warning: Breaking Change:  Requires `cocoapods >= 1.10+`.
+```bash
+$ pod --version
+// if < 1.10.0
+$ sudo gem install cocoapods
+```
+
 ## 0.6.0 - 2020-06-11
 * [Fixed][Android] `com.android.tools.build:gradle:4.0.0` no longer allows "*direct local aar dependencies*".  The Android Setup now requires a custom __`maven url`__ to be added to your app's root __`android/build.gradle`__:
 
