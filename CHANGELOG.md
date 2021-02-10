@@ -1,3 +1,62 @@
+## 0.7.0 - 2021-02-11
+* [Added][iOS] Implement two new iOS options for `BackgroundFetch.scheduleTask`:
+    - `bool requiresNetworkConnectivity`
+    - `bool requiresCharging` (previously Android-only).
+    
+* [Changed][iOS] Migrate `TSBackgroundFetch.framework` to new `.xcframework` for *MacCatalyst* support with new Apple silcon.
+
+### :warning: Breaking Change:  Requires `cocoapods >= 1.10+`.
+
+*iOS'* new `.xcframework` requires *cocoapods >= 1.10+*:
+
+```bash
+$ pod --version
+// if < 1.10.0
+$ sudo gem install cocoapods
+```
+
+* [Added] task-timeout callback.  `BackgroundFetch.configure` now accepts a 3rd argument `onTimeout` callback.  This callback will be executed when the operating system has signalled your task has expired before your task has called `BackgroundFetch.finish(taskId)`.  You must stop whatever you're task is doing and execute `BackgroundFetch.finish(taskId)` immediately.
+```dart
+BackgroundFetch.configure(BackgroundFetchConfig(
+  minimumFetchInterval: 15
+), (String taskId) {  // <-- task callback.
+  print("[BackgroundFetch] taskId: $taskId");
+  BackgroundFetch.finish(taskId);
+}, (String taskId) {  // <-- NEW:  task-timeout callback.
+  // This task has exceeded its allowed running-time.  You must stop what you're doing immediately finish(taskId)
+  print("[BackgroundFetch] TIMEOUT taskId: $taskId");
+  BackgroundFetch.finish(taskId);
+});
+```
+
+### :warning: [Android] Breaking Change For Android Headless-task
+- Since the registered Android headless-task (`BackgroundFetch.registerHeadlessTask`) can only receive a single parameter, your headless-task will now receive a `HeadlessTask task` instance rather than `String taskId` **in order to differentiate task-timeout events**.
+
+__OLD__
+```dart
+void myBackgroundFetchHeadlessTask(String taskId) async { // <-- OLD:  String taskId
+  print("[BackgroundFetch] Headless task: $taskId");
+  BackgroundFetch.finish(taskId);
+}
+BackgroundFetch.registerHeadlessTask(myBackgroundFetchHeadlessTask);
+```
+__NEW__
+```dart
+void myBackgroundFetchHeadlessTask(HeadlessTask task) async { // <-- NEW:  HeadlessTask now provided.
+  String taskId = task.taskId;    // <-- NEW:  Get taskId from HeadlessTask
+  bool isTimeout = task.timeout;  // <-- NEW:  true if this task has timed-out.
+  if (isTimeout) {
+    // This task has exceeded its allowed running-time.  You must stop what you're doing immediately finish(taskId)
+    print("[BackgroundFetch] Headless TIMEOUT: $taskId");
+    BackgroundFetch.finish(taskId);
+    return;
+  }
+  print("[BackgroundFetch] Headless task: $taskId");
+  BackgroundFetch.finish(taskId);
+}
+BackgroundFetch.registerHeadlessTask(myBackgroundFetchHeadlessTask);
+```
+
 ## 0.6.0 - 2020-06-11
 * [Fixed][Android] `com.android.tools.build:gradle:4.0.0` no longer allows "*direct local aar dependencies*".  The Android Setup now requires a custom __`maven url`__ to be added to your app's root __`android/build.gradle`__:
 

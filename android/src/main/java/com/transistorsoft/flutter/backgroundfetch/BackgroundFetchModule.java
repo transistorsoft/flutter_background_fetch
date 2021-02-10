@@ -2,7 +2,6 @@ package com.transistorsoft.flutter.backgroundfetch;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,6 +9,7 @@ import androidx.annotation.Nullable;
 import com.transistorsoft.tsbackgroundfetch.BackgroundFetch;
 import com.transistorsoft.tsbackgroundfetch.BackgroundFetchConfig;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,7 +30,7 @@ public class BackgroundFetchModule implements MethodCallHandler {
     static final String FETCH_TASK_ID                       = "flutter_background_fetch";
 
     private static final String METHOD_CHANNEL_NAME         = PLUGIN_ID + "/methods";
-    private static final String EVENT_CHANNEL_NAME          = PLUGIN_ID + "/events";
+    private static final String EVENT_CHANNEL_NAME = PLUGIN_ID + "/events";
 
     private static final String ACTION_REGISTER_HEADLESS_TASK = "registerHeadlessTask";
     private static final String ACTION_SCHEDULE_TASK          = "scheduleTask";
@@ -38,12 +38,13 @@ public class BackgroundFetchModule implements MethodCallHandler {
     private static final String HEADLESS_JOB_SERVICE_CLASS = HeadlessTask.class.getName();
 
     private FetchStreamHandler mFetchCallback;
+
     private Context mContext;
 
     private BinaryMessenger mMessenger;
     private AtomicBoolean mIsAttachedToEngine = new AtomicBoolean(false);
     private MethodChannel mMethodChannel;
-    private EventChannel mEventChannel;
+    private EventChannel mEventChannelTask;
 
     static BackgroundFetchModule getInstance() {
         if (sInstance == null) {
@@ -76,8 +77,8 @@ public class BackgroundFetchModule implements MethodCallHandler {
 
     void setActivity(Activity activity) {
         if (activity != null) {
-            mEventChannel = new EventChannel(mMessenger, EVENT_CHANNEL_NAME);
-            mEventChannel.setStreamHandler(mFetchCallback);
+            mEventChannelTask = new EventChannel(mMessenger, EVENT_CHANNEL_NAME);
+            mEventChannelTask.setStreamHandler(mFetchCallback);
         }
     }
 
@@ -116,9 +117,9 @@ public class BackgroundFetchModule implements MethodCallHandler {
 
     private void configure(Map<String, Object> params, Result result) {
         BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
-        adapter.configure(buildConfig(params).
-                setTaskId(FETCH_TASK_ID).
-                setIsFetchTask(true)
+        adapter.configure(buildConfig(params)
+                .setTaskId(FETCH_TASK_ID)
+                .setIsFetchTask(true)
                 .build(), mFetchCallback);
 
         result.success(adapter.status());
@@ -209,7 +210,17 @@ public class BackgroundFetchModule implements MethodCallHandler {
 
         @Override
         public void onFetch(String taskId) {
-            mEventSink.success(taskId);
+            Map<String, Object> event = new HashMap<>();
+            event.put("timeout", false);
+            event.put("taskId", taskId);
+            mEventSink.success(event);
+        }
+        @Override
+        public void onTimeout(String taskId) {
+            Map<String, Object> event = new HashMap<>();
+            event.put("timeout", true);
+            event.put("taskId", taskId);
+            mEventSink.success(event);
         }
         @Override
         public void onListen(Object args, EventChannel.EventSink eventSink) {
