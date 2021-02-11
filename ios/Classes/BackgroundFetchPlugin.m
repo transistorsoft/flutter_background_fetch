@@ -1,5 +1,5 @@
 #import "BackgroundFetchPlugin.h"
-#import <TSBackgroundFetch/TSBackgroundFetch.h>
+@import TSBackgroundFetch;
 
 static NSString *const PLUGIN_PATH = @"com.transistorsoft/flutter_background_fetch";
 static NSString *const PLUGIN_ID = @"flutter_background_fetch";
@@ -48,7 +48,7 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
     NSString *eventPath = [NSString stringWithFormat:@"%@/%@", PLUGIN_PATH, EVENT_CHANNEL_NAME];
     FlutterEventChannel* eventChannel = [FlutterEventChannel eventChannelWithName:eventPath binaryMessenger:[registrar messenger]];
     [eventChannel setStreamHandler:instance];
-    
+
     NSString *scheduledEventPath = [NSString stringWithFormat:@"%@/%@", PLUGIN_PATH, EVENT_CHANNEL_SCHEDULED_TASKS];
     FlutterEventChannel* eventChannelScheduled = [FlutterEventChannel eventChannelWithName:scheduledEventPath binaryMessenger:[registrar messenger]];
     [eventChannelScheduled setStreamHandler:instance];
@@ -81,11 +81,11 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
 
 -(void) configure:(NSDictionary*)params result:(FlutterResult)result {
     TSBackgroundFetch *fetchManager = [TSBackgroundFetch sharedInstance];
-                
-    [fetchManager addListener:PLUGIN_ID callback:[self createCallback]];
-    
+
+    [fetchManager addListener:PLUGIN_ID callback:[self createFetchCallback] timeout:[self createFetchTimeoutCallback]];
+
     NSTimeInterval delay = [[params objectForKey:@"minimumFetchInterval"] doubleValue] * 60;
-    [fetchManager configure:delay callback:^(UIBackgroundRefreshStatus status) {        
+    [fetchManager configure:delay callback:^(UIBackgroundRefreshStatus status) {
         if (status != UIBackgroundRefreshStatusAvailable) {
             NSLog(@"- %@ failed to start, status: %lu", PLUGIN_ID, (long)status);
             result([FlutterError errorWithCode: [NSString stringWithFormat:@"%lu", (long) status] message:nil details:@(status)]);
@@ -97,15 +97,18 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
 
 -(void) start:(FlutterResult)result {
     TSBackgroundFetch *fetchManager = [TSBackgroundFetch sharedInstance];
-                                      
+
     [fetchManager status:^(UIBackgroundRefreshStatus status) {
         if (status == UIBackgroundRefreshStatusAvailable) {
-            [fetchManager addListener:PLUGIN_ID callback:[self createCallback]];
+            [fetchManager addListener:PLUGIN_ID callback:[self createFetchCallback] timeout:[self createFetchTimeoutCallback]];
             NSError *error = [fetchManager start:nil];
             if (!error) {
                 result(@(status));
             } else {
-                result([FlutterError errorWithCode: [NSString stringWithFormat:@"%lu", (long) status] message:error.localizedFailureReason details:nil]);
+                NSLog(@">>>>>>>>>>>> error: %@, %@", error, error.userInfo);
+                NSString *message = error.localizedFailureReason;
+                if (!message) message = error.domain;
+                result([FlutterError errorWithCode: [NSString stringWithFormat:@"%lu", (long) status] message:message details:@(error.code)]);
             }
         } else {
             NSLog(@"- %@ failed to start, status: %lu", PLUGIN_PATH, (long)status);
@@ -142,15 +145,21 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
     long delayMS = [[config objectForKey:@"delay"] longValue];
     NSTimeInterval delay = delayMS / 1000;
     BOOL periodic = [[config objectForKey:@"periodic"] boolValue];
-        
+    BOOL requiresCharging = ([config objectForKey:@"requiresCharging"]) ? [[config objectForKey:@"requiresCharging"] boolValue] : NO;
+    BOOL requiresNetwork = ([config objectForKey:@"requiresNetworkConnectivity"]) ? [[config objectForKey:@"requiresNetworkConnectivity"] boolValue] : NO;
+
     NSError *error = [[TSBackgroundFetch sharedInstance] scheduleProcessingTaskWithIdentifier:taskId
                                                                                         delay:delay
                                                                                      periodic:periodic
-                                                                                     callback:[self createCallback]];
+                                                                        requiresExternalPower: requiresCharging
+                                                                    requiresNetworkConnectivity:requiresNetwork
+                                                                                     callback:[self createTaskCallback]];
     if (!error) {
         result(@(YES));
     } else {
-        result([FlutterError errorWithCode: [NSString stringWithFormat:@"%lu", (long) error.code] message:error.localizedFailureReason details:nil]);
+        NSString *message = error.localizedFailureReason;
+        if (!message) message = error.domain;
+        result([FlutterError errorWithCode: [NSString stringWithFormat:@"%lu", (long) error.code] message:message details:nil]);
     }
 }
 
@@ -158,14 +167,40 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
     return [method isEqualToString:action];
 }
 
--(void (^)(NSString* taskId)) createCallback {
+-(void (^)(NSString* taskId)) createFetchCallback {
     return ^void(NSString* taskId){
         if (self->eventSink != nil) {
-            self->eventSink(taskId);
+            self->eventSink(@{
+                @"taskId": taskId,
+                @"timeout": @(NO)
+            });
         }
     };
 }
-    
+
+-(void (^)(NSString* taskId)) createFetchTimeoutCallback {
+    return ^void(NSString* taskId){
+        if (self->eventSink != nil) {
+            self->eventSink(@{
+                @"taskId": taskId,
+                @"timeout": @(YES)
+            });
+        }
+    };
+}
+
+-(void (^)(NSString* taskId, BOOL timeout)) createTaskCallback {
+    return ^void(NSString* taskId, BOOL timeout){
+        if (self->eventSink != nil) {
+            self->eventSink(@{
+                @"taskId": taskId,
+                @"timeout": @(timeout)
+            });
+        }
+    };
+}
+
+
 #pragma mark FlutterStreamHandler impl
 
 - (FlutterError*)onListenWithArguments:(id)arguments eventSink:(FlutterEventSink)sink {

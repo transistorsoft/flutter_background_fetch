@@ -26,17 +26,28 @@ enum NetworkType {
   CELLULAR
 }
 
+/// Event object provided to registered headlessTask.
+class HeadlessTask {
+  /// The task identifier
+  String taskId;
+
+  /// Signals whether this headless-task has timeout out.
+  bool timeout;
+
+  HeadlessTask(this.taskId, this.timeout);
+}
+
 /// Base class for both [BackgroundFetchConfig] and [TaskConfig].
 ///
 class _AbstractTaskConfig {
   /// __Android only__: Set `false` to continue background-fetch events after user terminates the app. Default to `true`.
-  bool stopOnTerminate;
+  bool stopOnTerminate = true;
 
   /// __Android only__: Set `true` to initiate background-fetch events when the device is rebooted. Defaults to `false`.
   ///
   /// ❗ NOTE: [startOnBoot] requires [stopOnTerminate]: `false`.
   ///
-  bool startOnBoot;
+  bool startOnBoot = false;
 
   /// __Android only__: Set true to enable the Headless mechanism, for handling fetch events after app termination.
   ///
@@ -52,7 +63,15 @@ class _AbstractTaskConfig {
   /// import 'package:background_fetch/background_fetch.dart';
   ///
   /// // This "Headless Task" is run when app is terminated.
-  /// void backgroundFetchHeadlessTask(String taskId) async {
+  /// void backgroundFetchHeadlessTask(HeadlessTask task) async {
+  ///   String taskId = task.taskId;
+  ///   bool isTimeout = task.timeout;
+  ///   if (isTimeout) {
+  ///     // This task has exceeded its allowed running-time.  You must stop what you're doing and immediately .finish(taskId)
+  ///     print("[BackgroundFetch] Headless task timed-out: $taskId");
+  ///     BackgroundFetch.finish(taskId);
+  ///     return;
+  ///   }
   ///   print("[BackgroundFetch] Headless event received: $taskId");
   ///   BackgroundFetch.finish(taskId);
   /// }
@@ -67,12 +86,12 @@ class _AbstractTaskConfig {
   ///   BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
   /// }
   /// ```
-  bool enableHeadless;
+  bool enableHeadless = false;
 
   /// __Android only__: Set true to force Task to use Android `AlarmManager` mechanism rather than `JobScheduler`.
   /// Defaults to `false`.  Will result in more precise scheduling of tasks **at the cost of higher battery usage.**
   ///
-  bool forceAlarmManager;
+  bool forceAlarmManager = false;
 
   /// [Android only] Set detailed description of the kind of network your job requires.
   ///
@@ -88,26 +107,26 @@ class _AbstractTaskConfig {
   ///	| [NetworkType.UNMETERED]   | This job requires network connectivity that is unmetered.            |
   ///	| [NetworkType.NOT_ROAMING] | This job requires network connectivity that is not roaming.          |
   ///
-  NetworkType requiredNetworkType;
+  NetworkType requiredNetworkType = NetworkType.NONE;
 
   ///
   /// [Android only] Specify that to run this job, the device's battery level must not be low.
   ///
   ///This defaults to false. If true, the job will only run when the battery level is not low, which is generally the point where the user is given a "low battery" warning.
   ///
-  bool requiresBatteryNotLow;
+  bool requiresBatteryNotLow = false;
 
   ///
   /// [Android only] Specify that to run this job, the device's available storage must not be low.
   ///
   /// This defaults to false. If true, the job will only run when the device is not in a low storage state, which is generally the point where the user is given a "low storage" warning.
   ///
-  bool requiresStorageNotLow;
+  bool requiresStorageNotLow = false;
 
   ///
   /// [Android only] Specify that to run this job, the device must be charging (or be a non-battery-powered device connected to permanent power, such as Android TV devices). This defaults to false.
   ///
-  bool requiresCharging;
+  bool requiresCharging = false;
 
   ///
   /// [Android only] When set true, ensure that this job will not run if the device is in active use.
@@ -116,18 +135,18 @@ class _AbstractTaskConfig {
   ///
   /// This state is a loose definition provided by the system. In general, it means that the device is not currently being used interactively, and has not been in use for some time. As such, it is a good time to perform resource heavy jobs. Bear in mind that battery usage will still be attributed to your application, and surfaced to the user in battery stats.
   ///
-  bool requiresDeviceIdle;
+  bool requiresDeviceIdle = false;
 
   _AbstractTaskConfig(
-      {this.stopOnTerminate,
-      this.startOnBoot,
-      this.enableHeadless,
-      this.forceAlarmManager,
-      this.requiredNetworkType,
-      this.requiresBatteryNotLow,
-      this.requiresStorageNotLow,
-      this.requiresCharging,
-      this.requiresDeviceIdle});
+      {this.stopOnTerminate = true,
+      this.startOnBoot = false,
+      this.enableHeadless = false,
+      this.forceAlarmManager = false,
+      this.requiredNetworkType = NetworkType.NONE,
+      this.requiresBatteryNotLow = false,
+      this.requiresStorageNotLow = false,
+      this.requiresCharging = false,
+      this.requiresDeviceIdle = false});
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> config = {};
@@ -157,13 +176,16 @@ class _AbstractTaskConfig {
 ///   stopOnTerminate: false,
 ///   startOnBoot: true,
 ///   enableHeadless: true
-/// ), (String taskId) {
+/// ), (String taskId) async {  // <-- Event callback
 ///   // This callback is typically fired every 15 minutes while in the background.
 ///   print('[BackgroundFetch] Event received.');
 ///   // IMPORTANT:  You must signal completion of your fetch task or the OS could
 ///   // punish your app for spending much time in the background.
 ///   BackgroundFetch.finish(taskId);
-/// })
+/// }, (String taskId) async {  // <-- Timeout callback
+///   // This task has exceeded its allowed running-time.  You must stop what you're doing and immediately .finish(taskId)
+///   BackgroundFetch.finish(taskId);
+/// });
 ///
 class BackgroundFetchConfig extends _AbstractTaskConfig {
   /// The minimum interval in minutes to execute background fetch events.
@@ -212,20 +234,26 @@ class TaskConfig extends _AbstractTaskConfig {
   /// Controls whether this task should execute repeatedly.  Defaults to `false`.
   bool periodic;
 
-  TaskConfig({
-    @required this.taskId,
-    @required this.delay,
-    this.periodic = false,
-    bool stopOnTerminate,
-    bool startOnBoot,
-    bool enableHeadless,
-    bool forceAlarmManager,
-    NetworkType requiredNetworkType,
-    bool requiresBatteryNotLow,
-    bool requiresStorageNotLow,
-    bool requiresCharging,
-    bool requiresDeviceIdle,
-  }) : super(
+  ///
+  /// [iOS only] Set `true` when this task requires network connectivity.
+  ///
+  bool requiresNetworkConnectivity = false;
+
+  TaskConfig(
+      {@required this.taskId,
+      @required this.delay,
+      this.periodic = false,
+      bool stopOnTerminate,
+      bool startOnBoot,
+      bool enableHeadless,
+      bool forceAlarmManager,
+      NetworkType requiredNetworkType,
+      bool requiresBatteryNotLow,
+      bool requiresStorageNotLow,
+      bool requiresCharging,
+      bool requiresDeviceIdle,
+      this.requiresNetworkConnectivity = false})
+      : super(
             stopOnTerminate: stopOnTerminate,
             startOnBoot: startOnBoot,
             enableHeadless: enableHeadless,
@@ -241,6 +269,7 @@ class TaskConfig extends _AbstractTaskConfig {
     config['taskId'] = this.taskId;
     config['delay'] = this.delay;
     config['periodic'] = this.periodic;
+    config['requiresNetworkConnectivity'] = this.requiresNetworkConnectivity;
     return config;
   }
 }
@@ -261,11 +290,14 @@ class TaskConfig extends _AbstractTaskConfig {
 ///   minimumFetchInterval: 15,  // <-- minutes
 ///   stopOnTerminate: false,
 ///   startOnBoot: true
-/// ), (String taskId) {
+/// ), (String taskId) async {  // <-- Event callback
 ///   // This callback is typically fired every 15 minutes while in the background.
 ///   print('[BackgroundFetch] Event received.');
 ///   // IMPORTANT:  You must signal completion of your fetch task or the OS could
 ///   // punish your app for spending much time in the background.
+///   BackgroundFetch.finish(taskId);
+/// }, (String taskId) async {  // <-- Task timeout callback
+///   // This task has exceeded its allowed running-time.  You must stop what you're doing and immediately .finish(taskId)
 ///   BackgroundFetch.finish(taskId);
 /// })
 /// ```
@@ -276,12 +308,17 @@ class TaskConfig extends _AbstractTaskConfig {
 ///
 /// __Note__:  All scheduled tasks are fired into the callback `Function` provided to the [configure] method.
 ///
+/// ### ⚠️ iOS:
+///- `scheduleTask` on *iOS* seems only to run when the device is plugged into power.
+///- `scheduleTask` on *iOS* are designed for *low-priority* tasks, such as purging cache files &mdash; they tend to be **unreliable for mission-critical tasks**.  `scheduleTask` will *never* run a frequently as you want.
+///- The default `fetch` event is much more reliable and fires far more often.
+///
 /// ```dart
 /// BackgroundFetch.configure(BackgroundFetchConfig(
 ///   minimumFetchInterval: 15,
 ///   stopOnTerminate: false,
 ///   forceAlarmManager: true
-/// ), (String taskId) async {
+/// ), (String taskId) async {  // <-- Event callback
 ///   print("[BackgroundFetch] taskId: $taskId");
 ///   switch (taskId) {
 ///     case 'com.foo.customfetchtask':
@@ -291,6 +328,9 @@ class TaskConfig extends _AbstractTaskConfig {
 ///       // Handle the default periodic fetch task here///
 ///   }
 ///   // You must call finish for each taskId.
+///   BackgroundFetch.finish(taskId);
+/// }, (String taskId) async {  // <-- Task timeout callback
+///   // This task has exceeded its allowed running-time.  You must stop what you're doing and immediately .finish(taskId)
 ///   BackgroundFetch.finish(taskId);
 /// });
 ///
@@ -313,8 +353,11 @@ class TaskConfig extends _AbstractTaskConfig {
 ///   minimumFetchInterval: 15,
 ///   stopOnTerminate: false,
 ///   forceAlarmManager: true
-/// ), (String taskId) {
+/// ), (String taskId) async {  // <-- Event callback
 ///   print("[BackgroundFetch] taskId: $taskId");
+///   BackgroundFetch.finish(taskId);
+/// }, (String taskId) async {  // <-- Timeout callback
+///   // This task has exceeded its allowed running-time.  You must stop what you're doing and immediately .finish(taskId)
 ///   BackgroundFetch.finish(taskId);
 /// });
 ///
@@ -348,7 +391,7 @@ class BackgroundFetch {
   static const MethodChannel _methodChannel =
       const MethodChannel(_METHOD_CHANNEL_NAME);
 
-  static const EventChannel _eventChannel =
+  static const EventChannel _eventChannelTask =
       const EventChannel(_EVENT_CHANNEL_NAME);
 
   static Stream<dynamic> _eventsFetch;
@@ -360,21 +403,35 @@ class BackgroundFetch {
   ///   minimumFetchInterval: 15,
   ///   stopOnTerminate: false,
   ///   startOnBoot: true
-  /// ), (String taskId) {
+  /// ), (String taskId) {  // <-- Event callback
   ///   // This callback is typically fired every 15 minutes while in the background.
   ///   print('[BackgroundFetch] Event received.');
   ///   // IMPORTANT:  You must signal completion of your fetch task or the OS could punish your app for
   ///   // spending much time in the background.
   ///   BackgroundFetch.finish(taskId);
+  /// }, (String taskId) async {  // <-- Task timeout
+  ///   // This task has exceeded its allowed running-time.  You must stop what you're doing and immediately .finish(taskId)
+  ///   BackgroundFetch.finish(taskId);
   /// })
   /// ```
-  static Future<int> configure(
-      BackgroundFetchConfig config, Function callback) {
+  static Future<int> configure(BackgroundFetchConfig config, Function onFetch,
+      [Function onTimeout]) {
     if (_eventsFetch == null) {
-      _eventsFetch = _eventChannel.receiveBroadcastStream();
-
-      _eventsFetch.listen((dynamic v) {
-        callback(v);
+      _eventsFetch = _eventChannelTask.receiveBroadcastStream();
+      if (onTimeout == null) {
+        onTimeout = (String taskId) {
+          print(
+              "[BackgroundFetch] task timed-out without onTimeout callback: $taskId.  You should provide an onTimeout callback to BackgroundFetch.configure.");
+          finish(taskId);
+        };
+      }
+      _eventsFetch.listen((dynamic event) {
+        String taskId = event['taskId'];
+        if (event['timeout']) {
+          onTimeout(taskId);
+        } else {
+          onFetch(taskId);
+        }
       });
     }
     Completer completer = new Completer<int>();
@@ -399,7 +456,11 @@ class BackgroundFetch {
     _methodChannel.invokeMethod('start').then((dynamic status) {
       completer.complete(status);
     }).catchError((dynamic e) {
-      completer.completeError(e.details);
+      String message = "Unknown error";
+      if (e.details != null) {
+        message = e.details;
+      }
+      completer.completeError(message);
     });
     return completer.future;
   }
@@ -411,8 +472,11 @@ class BackgroundFetch {
   /// ```dart
   /// BackgroundFetch.configure(BackgroundFetchConfig(
   ///   minimumFetchInterval: 15
-  /// ), (String taskId) {
+  /// ), (String taskId) {  // <-- Event callback
   ///   print("[BackgroundFetch] taskId: $taskId");
+  ///   BackgroundFetch.finish(taskId);
+  /// }, (String taskId) async {  // <-- Timeout callback
+  ///   // This task has exceeded its allowed running-time.  You must stop what you're doing and immediately .finish(taskId)
   ///   BackgroundFetch.finish(taskId);
   /// });
   ///
@@ -449,10 +513,15 @@ class BackgroundFetch {
   ///
   /// __Note__:  All tasks are fired into the callback Function provided to [BackgroundFetch.configure].  You cannot provide a callback Function to *this* method.
   ///
+  /// ### ⚠️ iOS:
+  ///- `scheduleTask` on *iOS* seems only to run when the device is plugged into power.
+  ///- `scheduleTask` on *iOS* are designed for *low-priority* tasks, such as purging cache files &mdash; they tend to be **unreliable for mission-critical tasks**.  `scheduleTask` will *never* run a frequently as you want.
+  ///- The default `fetch` event is much more reliable and fires far more often.
+  ///
   /// ```dart
   /// BackgroundFetch.configure(BackgroundFetchConfig(
   ///   minimumFetchInterval: 15
-  /// ), (String taskId) {
+  /// ), (String taskId) async {  // <-- Event callback
   ///   print("[BackgroundFetch] taskId: $taskId");
   ///   switch (taskId) {
   ///     case 'com.foo.my.task':
@@ -461,6 +530,9 @@ class BackgroundFetch {
   ///     default:
   ///       print('Background Fetch event fired');
   ///   }
+  ///   BackgroundFetch.finish(taskId);
+  /// }, (String taskId) async {  // <-- Timeout callback
+  ///   // This task has exceeded its allowed running-time.  You must stop what you're doing and immediately .finish(taskId)
   ///   BackgroundFetch.finish(taskId);
   /// });
   ///
@@ -500,8 +572,16 @@ class BackgroundFetch {
   /// import 'package:background_fetch/background_fetch.dart';
   ///
   /// // This "Headless Task" is run when app is terminated.
-  /// void backgroundFetchHeadlessTask(String taskId) async {
-  ///   print('[BackgroundFetch] Headless event received.');
+  /// void backgroundFetchHeadlessTask(HeadlessTask task) async {
+  ///   String taskId = task.taskId;
+  ///   bool isTimeout = task.timeout;
+  ///   if (isTimeout) {
+  ///     // This task has exceeded its allowed running-time.  You must stop what you're doing and immediately .finish(taskId)
+  ///     print("[BackgroundFetch] Headless task timed-out: $taskId");
+  ///     BackgroundFetch.finish(taskId);
+  ///     return;
+  ///   }
+  ///   print("[BackgroundFetch] Headless event received: $taskId");
   ///   BackgroundFetch.finish(taskId);
   /// }
   ///
@@ -514,64 +594,6 @@ class BackgroundFetch {
   ///   // Requires {stopOnTerminate: false, enableHeadless: true}
   ///   BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
   /// }
-  /// ```
-  /// # Setup
-  ///
-  /// ## `Flutter >= 1.12`
-  ///
-  /// - If you've upgraded your Flutter SDK to `1.12` (or higher) **AND** [Upgraded Your Android Project](https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects), there are no additional steps required &mdash; everything is now automatic!
-  ///
-  /// ## `Flutter < 1.12`
-  ///
-  /// If you intend to use the SDK's Android *Headless* mechanism, you must perform the following additional setup:
-  ///
-  /// Create either `Application.kt` or `Application.java` in the same directory as `MainActivity`.
-  ///
-  /// - For `Application.kt`, use the following:
-  ///
-  /// ```java
-  /// package your.app.name;  // <-- replace this
-  ///
-  /// import com.transistorsoft.flutter.backgroundgeolocation.BackgroundFetchPlugin;
-  ///
-  /// class Application : FlutterApplication(), PluginRegistrantCallback {
-  ///   override fun onCreate() {
-  ///     super.onCreate();
-  ///     BackgroundFetchPlugin.setPluginRegistrant(this);
-  ///   }
-  ///
-  ///   override fun registerWith(registry: PluginRegistry) {
-  ///     GeneratedPluginRegistrant.registerWith(registry);
-  ///   }
-  /// }
-  /// ```
-  ///
-  /// - For `Application.java`, use the following:
-  ///
-  /// ```java
-  /// package your.app.name;  // <-- replace this
-  ///
-  /// import com.transistorsoft.flutter.backgroundgeolocation.BackgroundFetchPlugin;
-  ///
-  /// public class Application extends FlutterApplication implements PluginRegistrantCallback {
-  ///   @Override
-  ///   public void onCreate() {
-  ///     super.onCreate();
-  ///     BackgroundFetchPlugin.setPluginRegistrant(this);
-  ///   }
-  ///
-  ///   @Override
-  ///   public void registerWith(PluginRegistry registry) {
-  ///     GeneratedPluginRegistrant.registerWith(registry);
-  ///   }
-  /// }
-  /// ```
-  ///
-  /// Now edit `AndroidManifest.xml` and provide a reference to your custom `Application` class:
-  /// ```xml
-  ///     <application
-  ///         android:name=".Application"
-  ///         ...
   /// ```
   ///
   static Future<bool> registerHeadlessTask(Function callback) async {
@@ -616,7 +638,9 @@ void _headlessCallbackDispatcher() {
             '[BackgroundFetch _headlessCallbackDispatcher] ERROR: Failed to get callback from handle: $args');
         return;
       }
-      callback(args['taskId']);
+      HeadlessTask task =
+          new HeadlessTask(args['task']['taskId'], args['task']['timeout']);
+      callback(task);
     } catch (e, stacktrace) {
       print('[BackgroundFetch _headlessCallbackDispather] ‼️ Callback error: ' +
           e.toString());

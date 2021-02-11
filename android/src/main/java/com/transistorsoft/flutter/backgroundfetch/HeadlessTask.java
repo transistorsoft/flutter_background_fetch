@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
+import com.transistorsoft.tsbackgroundfetch.BGTask;
 import com.transistorsoft.tsbackgroundfetch.BackgroundFetch;
 
 import org.json.JSONException;
@@ -25,7 +26,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.view.FlutterCallbackInformation;
-import io.flutter.view.FlutterMain;
+import io.flutter.FlutterInjector;
 
 @Keep
 public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
@@ -45,7 +46,7 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
 
     private long mRegistrationCallbackId;
     private long mClientCallbackId;
-    private String mTaskId;
+    private BGTask mTask;
 
     private static final List<OnInitializedCallback> sOnInitializedListeners = new ArrayList<>();
 
@@ -60,10 +61,10 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
         return true;
     }
 
-    public HeadlessTask(Context context, String taskId) {
+    public HeadlessTask(Context context, BGTask task) {
         mContext = context;
-        mTaskId = taskId;
-        Log.d(BackgroundFetch.TAG, "\uD83D\uDC80 [HeadlessTask " + mTaskId + "]");
+        mTask = task;
+        Log.d(BackgroundFetch.TAG, "\uD83D\uDC80 [HeadlessTask " + task.getTaskId() + "]");
         BackgroundFetch.getThreadPool().execute(new TaskRunner());
     }
 
@@ -110,10 +111,10 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
         JSONObject response = new JSONObject();
         try {
             response.put("callbackId", mClientCallbackId);
-            response.put("taskId", mTaskId);
+            response.put("task", mTask.toJson());
             sDispatchChannel.invokeMethod("", response);
         } catch (JSONException e) {
-            BackgroundFetch.getInstance(mContext).finish(mTaskId);
+            BackgroundFetch.getInstance(mContext).finish(mTask.getTaskId());
             Log.e(BackgroundFetch.TAG, e.getMessage());
             e.printStackTrace();
         }
@@ -125,7 +126,7 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
             return;
         }
 
-        String appBundlePath = FlutterMain.findAppBundlePath();
+        String appBundlePath = FlutterInjector.instance().flutterLoader().findAppBundlePath();
         AssetManager assets = mContext.getAssets();
         if (!sHeadlessTaskRegistered.get()) {
             sBackgroundFlutterEngine = new FlutterEngine(mContext);
@@ -138,7 +139,7 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
 
             if (callbackInfo == null) {
                 Log.e(BackgroundFetch.TAG, "Fatal: failed to find callback: " + mRegistrationCallbackId);
-                BackgroundFetch.getInstance(mContext).finish(mTaskId);
+                BackgroundFetch.getInstance(mContext).finish(mTask.getTaskId());
                 return;
             }
             DartExecutor.DartCallback dartCallback = new DartExecutor.DartCallback(assets, appBundlePath, callbackInfo);

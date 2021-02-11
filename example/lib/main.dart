@@ -10,7 +10,15 @@ const EVENTS_KEY = "fetch_events";
 
 
 /// This "Headless Task" is run when app is terminated.
-void backgroundFetchHeadlessTask(String taskId) async {
+void backgroundFetchHeadlessTask(HeadlessTask task) async {
+  String taskId = task.taskId;
+  bool timeout = task.timeout;
+  if (timeout) {
+    print("[BackgroundFetch] Headless task timed-out: $taskId");
+    BackgroundFetch.finish(taskId);
+    return;
+  }
+
   print("[BackgroundFetch] Headless event received: $taskId");
   DateTime timestamp = DateTime.now();
 
@@ -28,18 +36,17 @@ void backgroundFetchHeadlessTask(String taskId) async {
   // Persist fetch events in SharedPreferences
   prefs.setString(EVENTS_KEY, jsonEncode(events));
 
-  BackgroundFetch.finish(taskId);
-
   if (taskId == 'flutter_background_fetch') {
     BackgroundFetch.scheduleTask(TaskConfig(
         taskId: "com.transistorsoft.customtask",
         delay: 5000,
         periodic: false,
-        forceAlarmManager: true,
+        forceAlarmManager: false,
         stopOnTerminate: false,
         enableHeadless: true
     ));
   }
+  //BackgroundFetch.finish(taskId);
 }
 
 void main() {
@@ -80,7 +87,8 @@ class _MyAppState extends State<MyApp> {
     }
 
     // Configure BackgroundFetch.
-    BackgroundFetch.configure(BackgroundFetchConfig(
+    try {
+      int status = await BackgroundFetch.configure(BackgroundFetchConfig(
         minimumFetchInterval: 15,
         forceAlarmManager: false,
         stopOnTerminate: false,
@@ -91,36 +99,30 @@ class _MyAppState extends State<MyApp> {
         requiresStorageNotLow: false,
         requiresDeviceIdle: false,
         requiredNetworkType: NetworkType.NONE,
-    ), _onBackgroundFetch).then((int status) {
+      ), _onBackgroundFetch, _onBackgroundFetchTimeout);
       print('[BackgroundFetch] configure success: $status');
       setState(() {
         _status = status;
       });
 
-    }).catchError((e) {
+      // Schedule a "one-shot" custom-task in 10000ms.
+      // These are fairly reliable on Android (particularly with forceAlarmManager) but not iOS,
+      // where device must be powered (and delay will be throttled by the OS).
+      BackgroundFetch.scheduleTask(TaskConfig(
+          taskId: "com.transistorsoft.customtask",
+          delay: 10000,
+          periodic: false,
+          forceAlarmManager: true,
+          stopOnTerminate: false,
+          enableHeadless: true
+      ));
+
+    } catch(e) {
       print('[BackgroundFetch] configure ERROR: $e');
       setState(() {
         _status = e;
       });
-    });
-
-    // Schedule a "one-shot" custom-task in 10000ms.
-    // These are fairly reliable on Android (particularly with forceAlarmManager) but not iOS,
-    // where device must be powered (and delay will be throttled by the OS).
-    BackgroundFetch.scheduleTask(TaskConfig(
-        taskId: "com.transistorsoft.customtask",
-        delay: 10000,
-        periodic: false,
-        forceAlarmManager: true,
-        stopOnTerminate: false,
-        enableHeadless: true
-    ));
-
-    // Optionally query the current BackgroundFetch status.
-    int status = await BackgroundFetch.status;
-    setState(() {
-      _status = status;
-    });
+    }
 
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
@@ -141,18 +143,27 @@ class _MyAppState extends State<MyApp> {
 
     if (taskId == "flutter_background_fetch") {
       // Schedule a one-shot task when fetch event received (for testing).
+      /*
       BackgroundFetch.scheduleTask(TaskConfig(
           taskId: "com.transistorsoft.customtask",
           delay: 5000,
           periodic: false,
           forceAlarmManager: true,
           stopOnTerminate: false,
-          enableHeadless: true
+          enableHeadless: true,
+          requiresNetworkConnectivity: true,
+          requiresCharging: true
       ));
+       */
     }
-
     // IMPORTANT:  You must signal completion of your fetch task or the OS can punish your app
     // for taking too long in the background.
+    BackgroundFetch.finish(taskId);
+  }
+
+  /// This event fires shortly before your task is about to timeout.  You must finish any outstanding work and call BackgroundFetch.finish(taskId).
+  void _onBackgroundFetchTimeout(String taskId) {
+    print("[BackgroundFetch] TIMEOUT: $taskId");
     BackgroundFetch.finish(taskId);
   }
 
@@ -195,12 +206,12 @@ class _MyAppState extends State<MyApp> {
     return new MaterialApp(
       home: new Scaffold(
         appBar: new AppBar(
-          title: const Text('BackgroundFetch Example', style: TextStyle(color: Colors.black)),
-          backgroundColor: Colors.amberAccent,
-          brightness: Brightness.light,
-          actions: <Widget>[
-            Switch(value: _enabled, onChanged: _onClickEnable),
-          ]
+            title: const Text('BackgroundFetch Example', style: TextStyle(color: Colors.black)),
+            backgroundColor: Colors.amberAccent,
+            brightness: Brightness.light,
+            actions: <Widget>[
+              Switch(value: _enabled, onChanged: _onClickEnable),
+            ]
         ),
         body: (_events.isEmpty) ? EMPTY_TEXT : Container(
           child: new ListView.builder(
@@ -219,16 +230,16 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
         bottomNavigationBar: BottomAppBar(
-          child: Container(
-            padding: EdgeInsets.only(left: 5.0, right:5.0),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  RaisedButton(onPressed: _onClickStatus, child: Text('Status: $_status')),
-                  RaisedButton(onPressed: _onClickClear, child: Text('Clear'))
-                ]
+            child: Container(
+                padding: EdgeInsets.only(left: 5.0, right:5.0),
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      RaisedButton(onPressed: _onClickStatus, child: Text('Status: $_status')),
+                      RaisedButton(onPressed: _onClickClear, child: Text('Clear'))
+                    ]
+                )
             )
-          )
         ),
       ),
     );

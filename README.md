@@ -12,7 +12,10 @@ Background Fetch is a *very* simple plugin which will awaken an app in the backg
 
 ### iOS
 - There is **no way** to increase the rate which a fetch-event occurs and this plugin sets the rate to the most frequent possible &mdash; you will **never** receive an event faster than **15 minutes**.  The operating-system will automatically throttle the rate the background-fetch events occur based upon usage patterns.  Eg: if user hasn't turned on their phone for a long period of time, fetch events will occur less frequently.
-- [__`scheduleTask`__](#executing-custom-tasks) seems only to fire when the device is plugged into power.
+- [__`scheduleTask`__](#executing-custom-tasks) seems only to fire when the device is plugged into power.  **`scheduleTask` is designed for low-priority tasks and will never run as frequently as you desire**.  The default `fetch` task will run far more frequently.
+- ⚠️ When your app is **terminated**, iOS *no longer fires events* &mdash; There is *no such thing* as **`stopOnTerminate: false`** for iOS.
+- iOS can task *days* before Apple's machine-learning algorithm settles in and begins regularly firing events.  Do not sit staring at your logs waiting for an event to fire.  If your *simulated events* work, that's all you need to know that everything is correctly configured.
+- If the user doesn't open your *iOS* app for long periods of time, *iOS* will **stop firing events**.
 
 ### Android
 - The Android plugin provides a [Headless](https://pub.dartlang.org/documentation/background_fetch/latest/background_fetch/BackgroundFetchConfig/enableHeadless.html) implementation allowing you to continue handling events even after app-termination.
@@ -21,11 +24,11 @@ Background Fetch is a *very* simple plugin which will awaken an app in the backg
 # Contents
 
 - ### 📚 [API Documentation](https://pub.dartlang.org/documentation/background_fetch/latest/background_fetch/BackgroundFetch-class.html)
-- ### [Installing the Plugin](#large_blue_diamond-installing-the-plugin)
-- ### [Setup Guides](#large_blue_diamond-setup-guides)
-- ### [Example](#large_blue_diamond-example)
-- ### [Debugging](#large_blue_diamond-debugging)
-- ### [Demo Application](#large_blue_diamond-demo-application)
+- ### [Installing the Plugin](#-installing-the-plugin)
+- ### [Setup Guides](#-setup-guides)
+- ### [Example](#-example)
+- ### [Debugging](#-debugging)
+- ### [Demo Application](#-demo-application)
 
 ## 🔷 Installing the plugin
 
@@ -33,7 +36,7 @@ Background Fetch is a *very* simple plugin which will awaken an app in the backg
 
 ```yaml
 dependencies:
-  background_fetch: '^0.5.1'
+  background_fetch: '^0.7.0'
 ```
 
 ### Or latest from Git:
@@ -60,9 +63,20 @@ import 'package:flutter/services.dart';
 
 import 'package:background_fetch/background_fetch.dart';
 
-/// This "Headless Task" is run when app is terminated.
-void backgroundFetchHeadlessTask(String taskId) async {
+// [Android-only] This "Headless Task" is run when the Android app 
+// is terminated with enableHeadless: true
+void backgroundFetchHeadlessTask(HeadlessTask task) async {
+  String taskId = task.taskId;
+  bool isTimeout = task.timeout;
+  if (isTimeout) {
+    // This task has exceeded its allowed running-time.  
+    // You must stop what you're doing and immediately .finish(taskId)
+    print("[BackgroundFetch] Headless task timed-out: $taskId");
+    BackgroundFetch.finish(taskId);
+    return;
+  }  
   print('[BackgroundFetch] Headless event received.');
+  // Do your work here...
   BackgroundFetch.finish(taskId);
 }
 
@@ -95,16 +109,16 @@ class _MyAppState extends State<MyApp> {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     // Configure BackgroundFetch.
-    BackgroundFetch.configure(BackgroundFetchConfig(
+    int status = await BackgroundFetch.configure(BackgroundFetchConfig(
         minimumFetchInterval: 15,
         stopOnTerminate: false,
-        enableHeadless: false,
+        enableHeadless: true,
         requiresBatteryNotLow: false,
         requiresCharging: false,
         requiresStorageNotLow: false,
         requiresDeviceIdle: false,
         requiredNetworkType: NetworkType.NONE
-    ), (String taskId) async {
+    ), (String taskId) async {  // <-- Event handler
       // This is the fetch-event callback.
       print("[BackgroundFetch] Event received $taskId");
       setState(() {
@@ -113,23 +127,15 @@ class _MyAppState extends State<MyApp> {
       // IMPORTANT:  You must signal completion of your task or the OS can punish your app
       // for taking too long in the background.
       BackgroundFetch.finish(taskId);
-    }).then((int status) {
-      print('[BackgroundFetch] configure success: $status');
-      setState(() {
-        _status = status;
-      });
-    }).catchError((e) {
-      print('[BackgroundFetch] configure ERROR: $e');
-      setState(() {
-        _status = e;
-      });
+    }, (String taskId) async {  // <-- Task timeout handler.
+      // This task has exceeded its allowed running-time.  You must stop what you're doing and immediately .finish(taskId)
+      print("[BackgroundFetch] TASK TIMEOUT taskId: $taskId");
+      BackgroundFetch.finish(taskId);
     });
-
-    // Optionally query the current BackgroundFetch status.
-    int status = await BackgroundFetch.status;
+    print('[BackgroundFetch] configure success: $status');
     setState(() {
       _status = status;
-    });
+    });        
 
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
@@ -208,11 +214,16 @@ class _MyAppState extends State<MyApp> {
 
 In addition to the default background-fetch task defined by `BackgroundFetch.configure`, you may also execute your own arbitrary "oneshot" or periodic tasks (iOS requires additional [Setup Instructions](./help/INSTALL-IOS.md)).  However, all events will be fired into the Callback provivded to **`BackgroundFetch#configure`**:
 
+### ⚠️ iOS:  
+- `scheduleTask` on *iOS* seems only to run when the device is plugged into power.
+- `scheduleTask` on *iOS* are designed for *low-priority* tasks, such as purging cache files &mdash; they tend to be **unreliable for mission-critical tasks**.  `scheduleTask` will *never* run a frequently as you want.
+- The default `fetch` event is much more reliable and fires far more often.  
+
 ```dart
 // Step 1:  Configure BackgroundFetch as usual.
-BackgroundFetch.configure(BackgroundFetchConfig(
+int status = await BackgroundFetch.configure(BackgroundFetchConfig(
   minimumFetchInterval: 15
-), (String taskId) async {
+), (String taskId) async {  // <-- Event callback.
   // This is the fetch-event callback.
   print("[BackgroundFetch] taskId: $taskId");
 
@@ -225,6 +236,10 @@ BackgroundFetch.configure(BackgroundFetchConfig(
       print("Default fetch task");
   }
   // Finish, providing received taskId.
+  BackgroundFetch.finish(taskId);
+}, (String taskId) async {  // <-- Event timeout callback
+  // This task has exceeded its allowed running-time.  You must stop what you're doing and immediately .finish(taskId)
+  print("[BackgroundFetch] TIMEOUT taskId: $taskId");
   BackgroundFetch.finish(taskId);
 });
 
@@ -239,10 +254,9 @@ BackgroundFetch.scheduleTask(TaskConfig(
 
 ### iOS
 
-#### :new: `BGTaskScheduler` API for iOS 13+
+#### :new: Simulating events for `BGTaskScheduler` API for iOS 13+
 
-- :warning: At the time of writing, the new task simulator does not yet work in Simulator; Only real devices.
-- See Apple docs [Starting and Terminating Tasks During Development](https://developer.apple.com/documentation/backgroundtasks/starting_and_terminating_tasks_during_development?language=objc)
+- ⚠️ At the time of writing, the new task simulator does not yet work in Simulator; Only real devices.
 - After running your app in XCode, Click the `[||]` button to initiate a *Breakpoint*.
 - In the console `(lldb)`, paste the following command (**Note:**  use cursor up/down keys to cycle through previously run commands):
 ```obj-c
@@ -257,6 +271,29 @@ e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWith
 
 ![](https://dl.dropboxusercontent.com/s/bsv0avap5c2h7ed/ios-simulate-bgtask-play.png?dl=1)
 
+#### Simulating task-timeout events
+
+- Only the new `BGTaskScheduler` api supports *simulated* task-timeout events.  To simulate a task-timeout, your `fetchCallback` must not call `BackgroundFetch.finish(taskId)`:
+
+```dart
+BackgroundFetch.configure(BackgroundFetchConfig(
+  minimumFetchInterval: 15
+), (String taskId) async {  // <-- Event callback.
+  // This is the fetch-event callback.
+  print("[BackgroundFetch] taskId: $taskId"); 
+  //BackgroundFetch.finish(taskId); // <-- Disable .finish(taskId) when simulating an iOS task timeout
+}, (String taskId) async {  // <-- Event timeout callback
+  // This task has exceeded its allowed running-time.  You must stop what you're doing and immediately .finish(taskId)
+  print("[BackgroundFetch] TIMEOUT taskId: $taskId");
+  BackgroundFetch.finish(taskId);
+});
+```
+
+- Now simulate an iOS task timeout as follows, in the same manner as simulating an event above:
+```obj-c
+e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateExpirationForTaskWithIdentifier:@"com.transistorsoft.fetch"]
+```
+
 #### Old `BackgroundFetch` API
 - Simulate background fetch events in XCode using **`Debug->Simulate Background Fetch`**
 - iOS can take some hours or even days to start a consistently scheduling background-fetch events since iOS schedules fetch events based upon the user's patterns of activity.  If *Simulate Background Fetch* works, your can be **sure** that everything is working fine.  You just need to wait.
@@ -267,10 +304,13 @@ e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWith
 ```bash
 $ adb logcat *:S flutter:V, TSBackgroundFetch:V
 ```
+![](https://dl.dropbox.com/s/fmrk5i06lojf9yh/android-adb-logcat-TSBackgroundFetch.png?dl=1))
+
 - Simulate a background-fetch event on a device (insert *&lt;your.application.id&gt;*) (only works for sdk `21+`:
 ```bash
 $ adb shell cmd jobscheduler run -f <your.application.id> 999
 ```
+
 - For devices with sdk `<21`, simulate a "Headless" event with (insert *&lt;your.application.id&gt;*)
 ```bash
 $ adb shell am broadcast -a <your.application.id>.event.BACKGROUND_FETCH
