@@ -11,8 +11,8 @@ const EVENTS_KEY = "fetch_events";
 
 /// This "Headless Task" is run when app is terminated.
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
-  String taskId = task.taskId;
-  bool timeout = task.timeout;
+  var taskId = task.taskId;
+  var timeout = task.timeout;
   if (timeout) {
     print("[BackgroundFetch] Headless task timed-out: $taskId");
     BackgroundFetch.finish(taskId);
@@ -20,13 +20,13 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
   }
 
   print("[BackgroundFetch] Headless event received: $taskId");
-  DateTime timestamp = DateTime.now();
+  var timestamp = DateTime.now();
 
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var prefs = await SharedPreferences.getInstance();
 
   // Read fetch_events from SharedPreferences
-  List<String> events = [];
-  String json = prefs.getString(EVENTS_KEY);
+  var events = <String>[];
+  var json = prefs.getString(EVENTS_KEY);
   if (json != null) {
     events = jsonDecode(json).cast<String>();
 
@@ -52,7 +52,7 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
 void main() {
   // Enable integration testing with the Flutter Driver extension.
   // See https://flutter.io/testing/ for more info.
-  runApp(new MyApp());
+  runApp(MyApp());
 
   // Register to receive BackgroundFetch events after app is terminated.
   // Requires {stopOnTerminate: false, enableHeadless: true}
@@ -78,8 +78,8 @@ class _MyAppState extends State<MyApp> {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     // Load persisted fetch events from SharedPreferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String json = prefs.getString(EVENTS_KEY);
+    var prefs = await SharedPreferences.getInstance();
+    var json = prefs.getString(EVENTS_KEY);
     if (json != null) {
       setState(() {
         _events = jsonDecode(json).cast<String>();
@@ -88,7 +88,7 @@ class _MyAppState extends State<MyApp> {
 
     // Configure BackgroundFetch.
     try {
-      int status = await BackgroundFetch.configure(BackgroundFetchConfig(
+      var status = await BackgroundFetch.configure(BackgroundFetchConfig(
         minimumFetchInterval: 15,
         forceAlarmManager: false,
         stopOnTerminate: false,
@@ -118,7 +118,7 @@ class _MyAppState extends State<MyApp> {
       ));
 
     } catch(e) {
-      print('[BackgroundFetch] configure ERROR: $e');
+      print("[BackgroundFetch] configure ERROR: $e");
       setState(() {
         _status = e;
       });
@@ -203,9 +203,9 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     const EMPTY_TEXT = Center(child: Text('Waiting for fetch events.  Simulate one.\n [Android] \$ ./scripts/simulate-fetch\n [iOS] XCode->Debug->Simulate Background Fetch'));
 
-    return new MaterialApp(
-      home: new Scaffold(
-        appBar: new AppBar(
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
             title: const Text('BackgroundFetch Example', style: TextStyle(color: Colors.black)),
             backgroundColor: Colors.amberAccent,
             brightness: Brightness.light,
@@ -214,7 +214,7 @@ class _MyAppState extends State<MyApp> {
             ]
         ),
         body: (_events.isEmpty) ? EMPTY_TEXT : Container(
-          child: new ListView.builder(
+          child: ListView.builder(
               itemCount: _events.length,
               itemBuilder: (BuildContext context, int index) {
                 List<String> event = _events[index].split("@");
@@ -224,7 +224,7 @@ class _MyAppState extends State<MyApp> {
                         labelStyle: TextStyle(color: Colors.blue, fontSize: 20.0),
                         labelText: "[${event[0].toString()}]"
                     ),
-                    child: new Text(event[1], style: TextStyle(color: Colors.black, fontSize: 16.0))
+                    child: Text(event[1], style: TextStyle(color: Colors.black, fontSize: 16.0))
                 );
               }
           ),
