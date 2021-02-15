@@ -1,3 +1,6 @@
+## 1.0.0-nullsafety.0 - 2021-02-15
+* [Changed] Implement [null-safety](https://dart.dev/null-safety) (Thanks to @GinoTerlouw).
+
 ## 0.7.0 - 2021-02-11
 * [Added][iOS] Implement two new iOS options for `BackgroundFetch.scheduleTask`:
     - `bool requiresNetworkConnectivity`
