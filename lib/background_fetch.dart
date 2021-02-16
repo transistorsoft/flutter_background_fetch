@@ -34,6 +34,8 @@ class HeadlessTask {
   /// Signals whether this headless-task has timeout out.
   bool timeout;
 
+  /// Create a new HeadlessTask instance.
+  /// Automatically instantitated and provided to your registered headless task.
   HeadlessTask(this.taskId, this.timeout);
 }
 
@@ -41,13 +43,13 @@ class HeadlessTask {
 ///
 class _AbstractTaskConfig {
   /// __Android only__: Set `false` to continue background-fetch events after user terminates the app. Default to `true`.
-  bool stopOnTerminate = true;
+  bool? stopOnTerminate;
 
   /// __Android only__: Set `true` to initiate background-fetch events when the device is rebooted. Defaults to `false`.
   ///
   /// ❗ NOTE: [startOnBoot] requires [stopOnTerminate]: `false`.
   ///
-  bool startOnBoot = false;
+  bool? startOnBoot;
 
   /// __Android only__: Set true to enable the Headless mechanism, for handling fetch events after app termination.
   ///
@@ -86,12 +88,12 @@ class _AbstractTaskConfig {
   ///   BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
   /// }
   /// ```
-  bool enableHeadless = false;
+  bool? enableHeadless;
 
   /// __Android only__: Set true to force Task to use Android `AlarmManager` mechanism rather than `JobScheduler`.
   /// Defaults to `false`.  Will result in more precise scheduling of tasks **at the cost of higher battery usage.**
   ///
-  bool forceAlarmManager = false;
+  bool? forceAlarmManager;
 
   /// [Android only] Set detailed description of the kind of network your job requires.
   ///
@@ -107,26 +109,26 @@ class _AbstractTaskConfig {
   ///	| [NetworkType.UNMETERED]   | This job requires network connectivity that is unmetered.            |
   ///	| [NetworkType.NOT_ROAMING] | This job requires network connectivity that is not roaming.          |
   ///
-  NetworkType requiredNetworkType = NetworkType.NONE;
+  NetworkType? requiredNetworkType;
 
   ///
   /// [Android only] Specify that to run this job, the device's battery level must not be low.
   ///
   ///This defaults to false. If true, the job will only run when the battery level is not low, which is generally the point where the user is given a "low battery" warning.
   ///
-  bool requiresBatteryNotLow = false;
+  bool? requiresBatteryNotLow;
 
   ///
   /// [Android only] Specify that to run this job, the device's available storage must not be low.
   ///
   /// This defaults to false. If true, the job will only run when the device is not in a low storage state, which is generally the point where the user is given a "low storage" warning.
   ///
-  bool requiresStorageNotLow = false;
+  bool? requiresStorageNotLow;
 
   ///
   /// [Android only] Specify that to run this job, the device must be charging (or be a non-battery-powered device connected to permanent power, such as Android TV devices). This defaults to false.
   ///
-  bool requiresCharging = false;
+  bool? requiresCharging;
 
   ///
   /// [Android only] When set true, ensure that this job will not run if the device is in active use.
@@ -135,7 +137,7 @@ class _AbstractTaskConfig {
   ///
   /// This state is a loose definition provided by the system. In general, it means that the device is not currently being used interactively, and has not been in use for some time. As such, it is a good time to perform resource heavy jobs. Bear in mind that battery usage will still be attributed to your application, and surfaced to the user in battery stats.
   ///
-  bool requiresDeviceIdle = false;
+  bool? requiresDeviceIdle;
 
   _AbstractTaskConfig(
       {this.stopOnTerminate = true,
@@ -156,7 +158,8 @@ class _AbstractTaskConfig {
     if (forceAlarmManager != null)
       config['forceAlarmManager'] = forceAlarmManager;
     if (requiredNetworkType != null)
-      config['requiredNetworkType'] = requiredNetworkType.index;
+      // https://stackoverflow.com/questions/65456958/dart-null-safety-doesnt-work-with-class-fields
+      config['requiredNetworkType'] = requiredNetworkType?.index;
     if (requiresBatteryNotLow != null)
       config['requiresBatteryNotLow'] = requiresBatteryNotLow;
     if (requiresStorageNotLow != null)
@@ -194,17 +197,18 @@ class BackgroundFetchConfig extends _AbstractTaskConfig {
   ///
   int minimumFetchInterval;
 
+  /// Creates an instance of `BackgroundFetchConfig` to provide to [configure].
   BackgroundFetchConfig(
-      {@required this.minimumFetchInterval,
-      bool stopOnTerminate,
-      bool startOnBoot,
-      bool enableHeadless,
-      bool forceAlarmManager,
-      NetworkType requiredNetworkType,
-      bool requiresBatteryNotLow,
-      bool requiresStorageNotLow,
-      bool requiresCharging,
-      bool requiresDeviceIdle})
+      {required this.minimumFetchInterval,
+      bool? stopOnTerminate,
+      bool? startOnBoot,
+      bool? enableHeadless,
+      bool? forceAlarmManager,
+      NetworkType? requiredNetworkType,
+      bool? requiresBatteryNotLow,
+      bool? requiresStorageNotLow,
+      bool? requiresCharging,
+      bool? requiresDeviceIdle})
       : super(
             stopOnTerminate: stopOnTerminate,
             startOnBoot: startOnBoot,
@@ -218,12 +222,13 @@ class BackgroundFetchConfig extends _AbstractTaskConfig {
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> config = super.toMap();
-    if (minimumFetchInterval != null)
       config['minimumFetchInterval'] = minimumFetchInterval;
     return config;
   }
 }
 
+/// Configuration object provided to [scheduleTask]
+///
 class TaskConfig extends _AbstractTaskConfig {
   /// Unique taskId.  This `taskId` will be provided to the BackgroundFetch callback function for use with [BackgroundFetch.finish].
   String taskId;
@@ -234,26 +239,26 @@ class TaskConfig extends _AbstractTaskConfig {
   /// Controls whether this task should execute repeatedly.  Defaults to `false`.
   bool periodic;
 
-  ///
   /// [iOS only] Set `true` when this task requires network connectivity.
   ///
   bool requiresNetworkConnectivity = false;
 
-  TaskConfig(
-      {@required this.taskId,
-      @required this.delay,
-      this.periodic = false,
-      bool stopOnTerminate,
-      bool startOnBoot,
-      bool enableHeadless,
-      bool forceAlarmManager,
-      NetworkType requiredNetworkType,
-      bool requiresBatteryNotLow,
-      bool requiresStorageNotLow,
-      bool requiresCharging,
-      bool requiresDeviceIdle,
-      this.requiresNetworkConnectivity = false})
-      : super(
+  /// Create an instance of `TaskConfig` for [scheduleTask].
+  TaskConfig({
+    required this.taskId,
+    required this.delay,
+    this.periodic = false,
+    bool? stopOnTerminate,
+    bool? startOnBoot,
+    bool? enableHeadless,
+    bool? forceAlarmManager,
+    NetworkType? requiredNetworkType,
+    bool? requiresBatteryNotLow,
+    bool? requiresStorageNotLow,
+    bool? requiresCharging,
+    bool? requiresDeviceIdle,
+    this.requiresNetworkConnectivity = false
+  }) : super(
             stopOnTerminate: stopOnTerminate,
             startOnBoot: startOnBoot,
             enableHeadless: enableHeadless,
@@ -394,7 +399,7 @@ class BackgroundFetch {
   static const EventChannel _eventChannelTask =
       const EventChannel(_EVENT_CHANNEL_NAME);
 
-  static Stream<dynamic> _eventsFetch;
+  static Stream<dynamic>? _eventsFetch;
 
   /// Configures the plugin's [BackgroundFetchConfig] and `callback` Function. This `callback` will fire each time a background-fetch event occurs (typically every 15 min).
   ///
@@ -415,7 +420,7 @@ class BackgroundFetch {
   /// })
   /// ```
   static Future<int> configure(BackgroundFetchConfig config, Function onFetch,
-      [Function onTimeout]) {
+      [Function? onTimeout]) {
     if (_eventsFetch == null) {
       _eventsFetch = _eventChannelTask.receiveBroadcastStream();
       if (onTimeout == null) {
@@ -425,16 +430,16 @@ class BackgroundFetch {
           finish(taskId);
         };
       }
-      _eventsFetch.listen((dynamic event) {
+      _eventsFetch?.listen((dynamic event) {
         String taskId = event['taskId'];
         if (event['timeout']) {
-          onTimeout(taskId);
+          onTimeout?.call(taskId);
         } else {
           onFetch(taskId);
         }
       });
     }
-    Completer completer = new Completer<int>();
+    Completer completer = Completer<int>();
 
     _methodChannel
         .invokeMethod('configure', config.toMap())
@@ -444,7 +449,7 @@ class BackgroundFetch {
       completer.completeError(e.details);
     });
 
-    return completer.future;
+    return completer.future as Future<int>;
   }
 
   /// Start the background-fetch API.
@@ -452,7 +457,7 @@ class BackgroundFetch {
   /// Your `callback` Function provided to [configure] will be executed each time a background-fetch event occurs. NOTE the [configure] method automatically calls [start]. You do not have to call this method after you first [configure] the plugin.
   ///
   static Future<int> start() {
-    Completer completer = new Completer<int>();
+    Completer completer = Completer<int>();
     _methodChannel.invokeMethod('start').then((dynamic status) {
       completer.complete(status);
     }).catchError((dynamic e) {
@@ -462,7 +467,7 @@ class BackgroundFetch {
       }
       completer.completeError(message);
     });
-    return completer.future;
+    return completer.future as Future<int>;
   }
 
   /// Stop the background-fetch API from firing events.
@@ -497,11 +502,16 @@ class BackgroundFetch {
   /// BackgroundFetch.stop();
   ///
   ///
-  static Future<int> stop([String taskId]) async {
+  static Future<int> stop([String? taskId]) async {
     int status = await _methodChannel.invokeMethod('stop', taskId);
     return status;
   }
 
+  /// Returns the current authorization status.
+  /// - [STATUS_AVAILABLE]
+  /// - [STATUS_DENIED]
+  /// - [STATUS_RESTRICTED]
+  ///
   static Future<int> get status async {
     int status = await _methodChannel.invokeMethod('status');
     return status;
@@ -597,13 +607,13 @@ class BackgroundFetch {
   /// ```
   ///
   static Future<bool> registerHeadlessTask(Function callback) async {
-    Completer completer = new Completer<bool>();
+    Completer completer = Completer<bool>();
 
     // Two callbacks:  the provided headless-task + _headlessRegistrationCallback
     List<int> args = [
-      PluginUtilities.getCallbackHandle(_headlessCallbackDispatcher)
+      PluginUtilities.getCallbackHandle(_headlessCallbackDispatcher)!
           .toRawHandle(),
-      PluginUtilities.getCallbackHandle(callback).toRawHandle()
+      PluginUtilities.getCallbackHandle(callback)!.toRawHandle()
     ];
 
     _methodChannel
@@ -615,7 +625,7 @@ class BackgroundFetch {
       print('[BackgroundFetch registerHeadlessTask] ‼️ $message');
       completer.complete(false);
     });
-    return completer.future;
+    return completer.future as Future<bool>;
   }
 }
 
@@ -626,12 +636,12 @@ void _headlessCallbackDispatcher() {
   const MethodChannel _headlessChannel =
       MethodChannel("$_PLUGIN_PATH/headless", JSONMethodCodec());
 
-  _headlessChannel.setMethodCallHandler((MethodCall call) async {
+  _headlessChannel.setMethodCallHandler((call) async {
     final args = call.arguments;
 
     // Run the headless-task.
     try {
-      final Function callback = PluginUtilities.getCallbackFromHandle(
+      final Function? callback = PluginUtilities.getCallbackFromHandle(
           CallbackHandle.fromRawHandle(args['callbackId']));
       if (callback == null) {
         print(
@@ -639,11 +649,10 @@ void _headlessCallbackDispatcher() {
         return;
       }
       HeadlessTask task =
-          new HeadlessTask(args['task']['taskId'], args['task']['timeout']);
+          HeadlessTask(args['task']['taskId'], args['task']['timeout']);
       callback(task);
     } catch (e, stacktrace) {
-      print('[BackgroundFetch _headlessCallbackDispather] ‼️ Callback error: ' +
-          e.toString());
+      print("[BackgroundFetch _headlessCallbackDispather] ‼️ Callback error: ${e.toString()}");
       print(stacktrace);
     }
   });
