@@ -1,3 +1,8 @@
+# CHANGELOG
+
+## 1.0.0-nullsafety.1 - 2021-02-18
+* [Fixed][Android] Fix `java.lang.NullPointerException: Attempt to invoke virtual method 'java.lang.String com.transistorsoft.tsbackgroundfetch.BGTask.getTaskId()' on a null object reference`
+
 ## 1.0.0-nullsafety.0 - 2021-02-15
 * [Changed] Implement [null-safety](https://dart.dev/null-safety) (Thanks to @GinoTerlouw).
 
