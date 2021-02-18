@@ -46,7 +46,7 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
         enableHeadless: true
     ));
   }
-  //BackgroundFetch.finish(taskId);
+  BackgroundFetch.finish(taskId);
 }
 
 void main() {

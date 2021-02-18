@@ -1,3 +1,8 @@
+# CHANGLOG
+
+## 0.7.1 - 2021-02-18
+* [Fixed][Android] Fix `java.lang.NullPointerException: Attempt to invoke virtual method 'java.lang.String com.transistorsoft.tsbackgroundfetch.BGTask.getTaskId()' on a null object reference`
+
 ## 0.7.0 - 2021-02-11
 * [Added][iOS] Implement two new iOS options for `BackgroundFetch.scheduleTask`:
     - `bool requiresNetworkConnectivity`
