@@ -12,7 +12,8 @@ Background Fetch is a *very* simple plugin which will awaken an app in the backg
 
 ### iOS
 - There is **no way** to increase the rate which a fetch-event occurs and this plugin sets the rate to the most frequent possible &mdash; you will **never** receive an event faster than **15 minutes**.  The operating-system will automatically throttle the rate the background-fetch events occur based upon usage patterns.  Eg: if user hasn't turned on their phone for a long period of time, fetch events will occur less frequently.
-- [__`scheduleTask`__](#executing-custom-tasks) seems only to fire when the device is plugged into power.  **`scheduleTask` is designed for low-priority tasks and will never run as frequently as you desire**.  The default `fetch` task will run far more frequently.
+- [__`scheduleTask`__](#executing-custom-tasks) seems only to fire when the device is plugged into power.  **`scheduleTask` is designed for low-priority tasks and will never run as frequently as you desire**.
+- The default `fetch` task will run far more frequently.
 - ⚠️ When your app is **terminated**, iOS *no longer fires events* &mdash; There is *no such thing* as **`stopOnTerminate: false`** for iOS.
 - iOS can task *days* before Apple's machine-learning algorithm settles in and begins regularly firing events.  Do not sit staring at your logs waiting for an event to fire.  If your *simulated events* work, that's all you need to know that everything is correctly configured.
 - If the user doesn't open your *iOS* app for long periods of time, *iOS* will **stop firing events**.
@@ -216,8 +217,9 @@ In addition to the default background-fetch task defined by `BackgroundFetch.con
 
 ### ⚠️ iOS:  
 - `scheduleTask` on *iOS* seems only to run when the device is plugged into power.
-- `scheduleTask` on *iOS* are designed for *low-priority* tasks, such as purging cache files &mdash; they tend to be **unreliable for mission-critical tasks**.  `scheduleTask` will *never* run a frequently as you want.
-- The default `fetch` event is much more reliable and fires far more often.  
+- `scheduleTask` on *iOS* are designed for *low-priority* tasks, such as purging cache files &mdash; they tend to be **unreliable for mission-critical tasks**.  `scheduleTask` will *never* run as frequently as you want.
+- The default `fetch` event is much more reliable and fires far more often.
+- `scheduleTask` on *iOS* stop when the *user* terminates the app.  There is no such thing as `stopOnTerminate: false` for *iOS*.
 
 ```dart
 // Step 1:  Configure BackgroundFetch as usual.

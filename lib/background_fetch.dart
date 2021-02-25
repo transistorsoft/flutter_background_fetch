@@ -97,8 +97,7 @@ class _AbstractTaskConfig {
 
   /// [Android only] Set detailed description of the kind of network your job requires.
   ///
-  /// If your job doesn't need a network connection, you don't need to use this option, as the default is [[BackgroundFetch.NEWORK_TYPE_NONE]].
-  ///
+  /// If your job doesn't need a network connection, you don't need to use this option as the default value is [BackgroundFetch.NEWORK_TYPE_NONE].
   /// Calling this method defines network as a strict requirement for your job. If the network requested is not available your job will never run.
   ///
   /// | NetworkType                                      | Description                                                          |
@@ -135,7 +134,7 @@ class _AbstractTaskConfig {
   ///
   /// The default state is false: that is, the for the job to be runnable even when someone is interacting with the device.
   ///
-  /// This state is a loose definition provided by the system. In general, it means that the device is not currently being used interactively, and has not been in use for some time. As such, it is a good time to perform resource heavy jobs. Bear in mind that battery usage will still be attributed to your application, and surfaced to the user in battery stats.
+  /// This state is a loose definition provided by the system. In general, it means that the device is not currently being used interactively, and has not been in use for some time. As such, it is a good time to perform resource heavy jobs. Bear in mind that battery usage will still be attributed to your application, and shown to the user in battery stats.
   ///
   bool? requiresDeviceIdle;
 
