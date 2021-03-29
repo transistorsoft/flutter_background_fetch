@@ -1,5 +1,8 @@
 # CHANGLOG
 
+## 0.7.2 - 2021-03-29
+* [Fixed][Android] Flutter 2 did something to break Headless registration.
+
 ## 0.7.1 - 2021-02-18
 * [Fixed][Android] Fix `java.lang.NullPointerException: Attempt to invoke virtual method 'java.lang.String com.transistorsoft.tsbackgroundfetch.BGTask.getTaskId()' on a null object reference`
 
