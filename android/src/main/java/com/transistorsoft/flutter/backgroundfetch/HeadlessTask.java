@@ -20,13 +20,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.loader.ApplicationInfoLoader;
+import io.flutter.embedding.engine.loader.FlutterApplicationInfo;
 import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
 import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.view.FlutterCallbackInformation;
-import io.flutter.FlutterInjector;
 
 @Keep
 public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
@@ -126,7 +127,9 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
             return;
         }
 
-        String appBundlePath = FlutterInjector.instance().flutterLoader().findAppBundlePath();
+        FlutterApplicationInfo info = ApplicationInfoLoader.load(mContext);
+        String appBundlePath = info.flutterAssetsDir;
+
         AssetManager assets = mContext.getAssets();
         if (!sHeadlessTaskRegistered.get()) {
             sBackgroundFlutterEngine = new FlutterEngine(mContext);
