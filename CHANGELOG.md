@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.0-nullsafety.2 - 2021-04-01
+* [Fixed][Android] Flutter 2 broke Android Headless Task with Null-pointer exception.
+
 ## 1.0.0-nullsafety.1 - 2021-02-18
 * [Fixed][Android] Fix `java.lang.NullPointerException: Attempt to invoke virtual method 'java.lang.String com.transistorsoft.tsbackgroundfetch.BGTask.getTaskId()' on a null object reference`
 

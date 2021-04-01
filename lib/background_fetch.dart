@@ -221,7 +221,7 @@ class BackgroundFetchConfig extends _AbstractTaskConfig {
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> config = super.toMap();
-      config['minimumFetchInterval'] = minimumFetchInterval;
+    config['minimumFetchInterval'] = minimumFetchInterval;
     return config;
   }
 }
@@ -243,21 +243,21 @@ class TaskConfig extends _AbstractTaskConfig {
   bool requiresNetworkConnectivity = false;
 
   /// Create an instance of `TaskConfig` for [scheduleTask].
-  TaskConfig({
-    required this.taskId,
-    required this.delay,
-    this.periodic = false,
-    bool? stopOnTerminate,
-    bool? startOnBoot,
-    bool? enableHeadless,
-    bool? forceAlarmManager,
-    NetworkType? requiredNetworkType,
-    bool? requiresBatteryNotLow,
-    bool? requiresStorageNotLow,
-    bool? requiresCharging,
-    bool? requiresDeviceIdle,
-    this.requiresNetworkConnectivity = false
-  }) : super(
+  TaskConfig(
+      {required this.taskId,
+      required this.delay,
+      this.periodic = false,
+      bool? stopOnTerminate,
+      bool? startOnBoot,
+      bool? enableHeadless,
+      bool? forceAlarmManager,
+      NetworkType? requiredNetworkType,
+      bool? requiresBatteryNotLow,
+      bool? requiresStorageNotLow,
+      bool? requiresCharging,
+      bool? requiresDeviceIdle,
+      this.requiresNetworkConnectivity = false})
+      : super(
             stopOnTerminate: stopOnTerminate,
             startOnBoot: startOnBoot,
             enableHeadless: enableHeadless,
@@ -651,7 +651,8 @@ void _headlessCallbackDispatcher() {
           HeadlessTask(args['task']['taskId'], args['task']['timeout']);
       callback(task);
     } catch (e, stacktrace) {
-      print("[BackgroundFetch _headlessCallbackDispather] ‼️ Callback error: ${e.toString()}");
+      print(
+          "[BackgroundFetch _headlessCallbackDispather] ‼️ Callback error: ${e.toString()}");
       print(stacktrace);
     }
   });
