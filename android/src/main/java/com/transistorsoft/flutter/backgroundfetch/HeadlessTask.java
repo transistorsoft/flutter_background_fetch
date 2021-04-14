@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.dart.DartExecutor;
-import io.flutter.embedding.engine.loader.ApplicationInfoLoader;
+import io.flutter.FlutterInjector;
 import io.flutter.embedding.engine.loader.FlutterApplicationInfo;
 import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
 import io.flutter.plugin.common.JSONMethodCodec;
@@ -127,8 +127,8 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
             return;
         }
 
-        FlutterApplicationInfo info = ApplicationInfoLoader.load(mContext);
-        String appBundlePath = info.flutterAssetsDir;
+        FlutterInjector.instance().flutterLoader().startInitialization(mContext);
+        String appBundlePath = FlutterInjector.instance().flutterLoader().findAppBundlePath();
 
         AssetManager assets = mContext.getAssets();
         if (!sHeadlessTaskRegistered.get()) {
