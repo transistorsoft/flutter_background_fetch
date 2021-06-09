@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.0 - 2021-06-09
+* Release 1.0.0-nullsafety.3 as 1.0.0
+
 ## 1.0.0-nullsafety.3 - 2021-06-09
 * [Fixed][Android] null check in FetchStreamHandler that mEventSink != null
 * [Changed][Android] Add new logic block to isMainActivityActive:  compare launchActivityName with task.baseActivity.getClassName()
