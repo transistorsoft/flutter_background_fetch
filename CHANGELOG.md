@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.0-nullsafety.3 - 2021-06-09
+* [Fixed][Android] null check in FetchStreamHandler that mEventSink != null
+* [Changed][Android] Add new logic block to isMainActivityActive:  compare launchActivityName with task.baseActivity.getClassName()
+
 ## 1.0.0-nullsafety.2 - 2021-04-01
 * [Fixed][Android] Flutter 2 broke Android Headless Task with Null-pointer exception.
 
