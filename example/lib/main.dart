@@ -29,7 +29,6 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
   var json = prefs.getString(EVENTS_KEY);
   if (json != null) {
     events = jsonDecode(json).cast<String>();
-
   }
   // Add new event.
   events.insert(0, "$taskId@$timestamp [Headless]");
@@ -46,7 +45,7 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
         enableHeadless: true
     ));
   }
-  //BackgroundFetch.finish(taskId);
+  BackgroundFetch.finish(taskId);
 }
 
 void main() {

@@ -2,6 +2,7 @@ package com.transistorsoft.flutter.backgroundfetch;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -213,6 +214,10 @@ public class BackgroundFetchModule implements MethodCallHandler {
             Map<String, Object> event = new HashMap<>();
             event.put("timeout", false);
             event.put("taskId", taskId);
+            if (mEventSink == null) {
+                Log.e(BackgroundFetch.TAG, "FetchStreamHandler.onFetch mEventSink is null.  Cannot fire Dart callback");
+                return;
+            }
             mEventSink.success(event);
         }
         @Override
@@ -220,6 +225,10 @@ public class BackgroundFetchModule implements MethodCallHandler {
             Map<String, Object> event = new HashMap<>();
             event.put("timeout", true);
             event.put("taskId", taskId);
+            if (mEventSink == null) {
+                Log.e(BackgroundFetch.TAG, "FetchStreamHandler.onTimeout mEventSink is null.  Cannot fire Dart callback");
+                return;
+            }
             mEventSink.success(event);
         }
         @Override
