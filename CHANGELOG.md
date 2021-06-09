@@ -1,5 +1,9 @@
 # CHANGLOG
 
+## 0.7.3 - 2021-06-09
+* [Fixed][Android] null check in FetchStreamHandler that mEventSink != null
+* [Changed][Android] Add new logic block to isMainActivityActive: compare launchActivityName with task.baseActivity.getClassName()
+
 ## 0.7.2 - 2021-03-29
 * [Fixed][Android] Flutter 2 did something to break Headless registration.
 
