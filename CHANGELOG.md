@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.0.1 - 2021-06-30
+* [Changed][Android] Allow multiple calls to .configure to allow re-configuring the fetch task.  Existing task will be cancelled and a new periodic fetch task re-scheduled according to new config.
+* [Changed][Android] Ignore initial fetch task fired immediately.
+* [Changed][Android] `android:exported="false"` on `BootReceiver` to resolve reported security analysis.
+
 ## 1.0.0 - 2021-06-09
 * Release 1.0.0-nullsafety.3 as 1.0.0
 

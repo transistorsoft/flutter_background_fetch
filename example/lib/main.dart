@@ -20,6 +20,7 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
   }
 
   print("[BackgroundFetch] Headless event received: $taskId");
+
   var timestamp = DateTime.now();
 
   var prefs = await SharedPreferences.getInstance();
@@ -36,6 +37,7 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
   prefs.setString(EVENTS_KEY, jsonEncode(events));
 
   if (taskId == 'flutter_background_fetch') {
+    /* DISABLED:  uncomment to fire a scheduleTask in headlessTask.
     BackgroundFetch.scheduleTask(TaskConfig(
         taskId: "com.transistorsoft.customtask",
         delay: 5000,
@@ -44,6 +46,7 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
         stopOnTerminate: false,
         enableHeadless: true
     ));
+     */
   }
   BackgroundFetch.finish(taskId);
 }
