@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 const _PLUGIN_PATH = "com.transistorsoft/flutter_background_fetch";
 const _METHOD_CHANNEL_NAME = "$_PLUGIN_PATH/methods";
@@ -418,8 +418,9 @@ class BackgroundFetch {
   ///   BackgroundFetch.finish(taskId);
   /// })
   /// ```
-  static Future<int> configure(BackgroundFetchConfig config, Function onFetch,
-      [Function? onTimeout]) {
+  static Future<int> configure(
+      BackgroundFetchConfig config, Function(String taskId) onFetch,
+      [Function(String taskId)? onTimeout]) {
     if (_eventsFetch == null) {
       _eventsFetch = _eventChannelTask.receiveBroadcastStream();
       if (onTimeout == null) {
@@ -605,7 +606,8 @@ class BackgroundFetch {
   /// }
   /// ```
   ///
-  static Future<bool> registerHeadlessTask(Function callback) async {
+  static Future<bool> registerHeadlessTask(
+      Function(HeadlessTask task) callback) async {
     Completer completer = Completer<bool>();
 
     // Two callbacks:  the provided headless-task + _headlessRegistrationCallback
