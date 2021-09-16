@@ -4,7 +4,6 @@ version '1.0-SNAPSHOT'
 buildscript {
     repositories {
         google()
-        jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.0.0'
@@ -14,7 +13,6 @@ buildscript {
 rootProject.allprojects {
     repositories {
         google()
-        jcenter()
         maven {
             url './libs'
         }
