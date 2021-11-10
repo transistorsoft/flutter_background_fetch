@@ -4,17 +4,17 @@ version '1.0-SNAPSHOT'
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.0'
+        classpath 'com.android.tools.build:gradle:4.0.2'
     }
 }
 
 rootProject.allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven {
             url './libs'
         }
@@ -41,5 +41,5 @@ android {
 
 dependencies {
     implementation(group: 'com.transistorsoft', name:'tsbackgroundfetch', version: '+')
-    implementation "androidx.appcompat:appcompat:${safeExtGet('appCompatVersion', "1.1.0")}"
+    implementation "androidx.appcompat:appcompat:${safeExtGet('appCompatVersion', "1.3.1")}"
 }

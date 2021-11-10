@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 const _PLUGIN_PATH = "com.transistorsoft/flutter_background_fetch";
 const _METHOD_CHANNEL_NAME = "$_PLUGIN_PATH/methods";
@@ -154,18 +154,24 @@ class _AbstractTaskConfig {
     if (stopOnTerminate != null) config['stopOnTerminate'] = stopOnTerminate;
     if (startOnBoot != null) config['startOnBoot'] = startOnBoot;
     if (enableHeadless != null) config['enableHeadless'] = enableHeadless;
-    if (forceAlarmManager != null)
+    if (forceAlarmManager != null) {
       config['forceAlarmManager'] = forceAlarmManager;
-    if (requiredNetworkType != null)
+    }
+    if (requiredNetworkType != null) {
       // https://stackoverflow.com/questions/65456958/dart-null-safety-doesnt-work-with-class-fields
-      config['requiredNetworkType'] = requiredNetworkType?.index;
-    if (requiresBatteryNotLow != null)
+    }  config['requiredNetworkType'] = requiredNetworkType?.index;
+    if (requiresBatteryNotLow != null) {
       config['requiresBatteryNotLow'] = requiresBatteryNotLow;
-    if (requiresStorageNotLow != null)
+    }
+    if (requiresStorageNotLow != null) {
       config['requiresStorageNotLow'] = requiresStorageNotLow;
-    if (requiresCharging != null) config['requiresCharging'] = requiresCharging;
-    if (requiresDeviceIdle != null)
+    }
+    if (requiresCharging != null) {
+      config['requiresCharging'] = requiresCharging;
+    }
+    if (requiresDeviceIdle != null) {
       config['requiresDeviceIdle'] = requiresDeviceIdle;
+    }
     return config;
   }
 }
@@ -270,10 +276,10 @@ class TaskConfig extends _AbstractTaskConfig {
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> config = super.toMap();
-    config['taskId'] = this.taskId;
-    config['delay'] = this.delay;
-    config['periodic'] = this.periodic;
-    config['requiresNetworkConnectivity'] = this.requiresNetworkConnectivity;
+    config['taskId'] = taskId;
+    config['delay'] = delay;
+    config['periodic'] = periodic;
+    config['requiresNetworkConnectivity'] = requiresNetworkConnectivity;
     return config;
   }
 }
@@ -393,10 +399,10 @@ class BackgroundFetch {
   static const int FETCH_RESULT_FAILED = 2;
 
   static const MethodChannel _methodChannel =
-      const MethodChannel(_METHOD_CHANNEL_NAME);
+      MethodChannel(_METHOD_CHANNEL_NAME);
 
   static const EventChannel _eventChannelTask =
-      const EventChannel(_EVENT_CHANNEL_NAME);
+      EventChannel(_EVENT_CHANNEL_NAME);
 
   static Stream<dynamic>? _eventsFetch;
 
@@ -423,7 +429,7 @@ class BackgroundFetch {
     if (_eventsFetch == null) {
       _eventsFetch = _eventChannelTask.receiveBroadcastStream();
       if (onTimeout == null) {
-        onTimeout = (String taskId) {
+        onTimeout = (taskId) {
           print(
               "[BackgroundFetch] task timed-out without onTimeout callback: $taskId.  You should provide an onTimeout callback to BackgroundFetch.configure.");
           finish(taskId);
@@ -460,7 +466,7 @@ class BackgroundFetch {
     _methodChannel.invokeMethod('start').then((dynamic status) {
       completer.complete(status);
     }).catchError((dynamic e) {
-      String message = "Unknown error";
+      var message = "Unknown error";
       if (e.details != null) {
         message = e.details;
       }
@@ -606,10 +612,10 @@ class BackgroundFetch {
   /// ```
   ///
   static Future<bool> registerHeadlessTask(Function callback) async {
-    Completer completer = Completer<bool>();
+    var completer = Completer<bool>();
 
     // Two callbacks:  the provided headless-task + _headlessRegistrationCallback
-    List<int> args = [
+    var args = [
       PluginUtilities.getCallbackHandle(_headlessCallbackDispatcher)!
           .toRawHandle(),
       PluginUtilities.getCallbackHandle(callback)!.toRawHandle()
@@ -620,11 +626,11 @@ class BackgroundFetch {
         .then((dynamic success) {
       completer.complete(true);
     }).catchError((error) {
-      String message = error.toString();
+      var message = error.toString();
       print('[BackgroundFetch registerHeadlessTask] ‼️ $message');
       completer.complete(false);
     });
-    return completer.future as Future<bool>;
+    return completer.future;
   }
 }
 
@@ -632,7 +638,7 @@ class BackgroundFetch {
 ///
 void _headlessCallbackDispatcher() {
   WidgetsFlutterBinding.ensureInitialized();
-  const MethodChannel _headlessChannel =
+  const _headlessChannel =
       MethodChannel("$_PLUGIN_PATH/headless", JSONMethodCodec());
 
   _headlessChannel.setMethodCallHandler((call) async {
@@ -640,14 +646,14 @@ void _headlessCallbackDispatcher() {
 
     // Run the headless-task.
     try {
-      final Function? callback = PluginUtilities.getCallbackFromHandle(
+      final callback = PluginUtilities.getCallbackFromHandle(
           CallbackHandle.fromRawHandle(args['callbackId']));
       if (callback == null) {
         print(
             '[BackgroundFetch _headlessCallbackDispatcher] ERROR: Failed to get callback from handle: $args');
         return;
       }
-      HeadlessTask task =
+      var task =
           HeadlessTask(args['task']['taskId'], args['task']['timeout']);
       callback(task);
     } catch (e, stacktrace) {

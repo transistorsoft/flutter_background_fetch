@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.2 - 2021-11-10
+* [Changed][Android] Remove deprectated `jcenter` repository.  Replaced with `mavenCentral`.
+
 ## 1.0.1 - 2021-06-30
 * [Changed][Android] Allow multiple calls to .configure to allow re-configuring the fetch task.  Existing task will be cancelled and a new periodic fetch task re-scheduled according to new config.
 * [Changed][Android] Ignore initial fetch task fired immediately.
