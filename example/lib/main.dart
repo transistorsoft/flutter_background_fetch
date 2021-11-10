@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:background_fetch/background_fetch.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+/// SharedPreferences data key.
 const EVENTS_KEY = "fetch_events";
-
 
 /// This "Headless Task" is run when app is terminated.
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
@@ -63,7 +62,7 @@ void main() {
 
 class MyApp extends StatefulWidget {
   @override
-  _MyAppState createState() => new _MyAppState();
+  _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
@@ -118,7 +117,6 @@ class _MyAppState extends State<MyApp> {
           stopOnTerminate: false,
           enableHeadless: true
       ));
-
     } catch(e) {
       print("[BackgroundFetch] configure ERROR: $e");
       setState(() {
@@ -133,8 +131,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _onBackgroundFetch(String taskId) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    DateTime timestamp = new DateTime.now();
+    var prefs = await SharedPreferences.getInstance();
+    var timestamp = DateTime.now();
     // This is the fetch-event callback.
     print("[BackgroundFetch] Event received: $taskId");
     setState(() {
@@ -174,20 +172,20 @@ class _MyAppState extends State<MyApp> {
       _enabled = enabled;
     });
     if (enabled) {
-      BackgroundFetch.start().then((int status) {
+      BackgroundFetch.start().then((status) {
         print('[BackgroundFetch] start success: $status');
       }).catchError((e) {
         print('[BackgroundFetch] start FAILURE: $e');
       });
     } else {
-      BackgroundFetch.stop().then((int status) {
+      BackgroundFetch.stop().then((status) {
         print('[BackgroundFetch] stop success: $status');
       });
     }
   }
 
   void _onClickStatus() async {
-    int status = await BackgroundFetch.status;
+    var status = await BackgroundFetch.status;
     print('[BackgroundFetch] status: $status');
     setState(() {
       _status = status;
@@ -195,7 +193,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _onClickClear() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var prefs = await SharedPreferences.getInstance();
     prefs.remove(EVENTS_KEY);
     setState(() {
       _events = [];
@@ -210,7 +208,7 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
             title: const Text('BackgroundFetch Example', style: TextStyle(color: Colors.black)),
             backgroundColor: Colors.amberAccent,
-            brightness: Brightness.light,
+            foregroundColor: Colors.black,
             actions: <Widget>[
               Switch(value: _enabled, onChanged: _onClickEnable),
             ]
@@ -218,8 +216,8 @@ class _MyAppState extends State<MyApp> {
         body: (_events.isEmpty) ? EMPTY_TEXT : Container(
           child: ListView.builder(
               itemCount: _events.length,
-              itemBuilder: (BuildContext context, int index) {
-                List<String> event = _events[index].split("@");
+              itemBuilder: (context, index) {
+                var event = _events[index].split("@");
                 return InputDecorator(
                     decoration: InputDecoration(
                         contentPadding: EdgeInsets.only(left: 5.0, top: 5.0, bottom: 5.0),
@@ -237,8 +235,8 @@ class _MyAppState extends State<MyApp> {
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      RaisedButton(onPressed: _onClickStatus, child: Text('Status: $_status')),
-                      RaisedButton(onPressed: _onClickClear, child: Text('Clear'))
+                      ElevatedButton(onPressed: _onClickStatus, child: Text('Status: $_status')),
+                      ElevatedButton(onPressed: _onClickClear, child: Text('Clear'))
                     ]
                 )
             )
