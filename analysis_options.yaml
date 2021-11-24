@@ -9,7 +9,7 @@ analyzer:
 linter:
   rules:
     # STYLE
-    - camel_case_types
+//    - camel_case_types
     - camel_case_extensions
     - library_names
     - file_names

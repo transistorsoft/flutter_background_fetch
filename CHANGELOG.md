@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.0.3 - 2021-11-24
+* [Fixed][Android] Fix typo related to requiredNetworkType, causing null pointer error.
+
 ## 1.0.2 - 2021-11-10
 * [Changed][Android] Remove deprectated `jcenter` repository.  Replaced with `mavenCentral`.
 

@@ -159,7 +159,8 @@ class _AbstractTaskConfig {
     }
     if (requiredNetworkType != null) {
       // https://stackoverflow.com/questions/65456958/dart-null-safety-doesnt-work-with-class-fields
-    }  config['requiredNetworkType'] = requiredNetworkType?.index;
+      config['requiredNetworkType'] = requiredNetworkType?.index;
+    }
     if (requiresBatteryNotLow != null) {
       config['requiresBatteryNotLow'] = requiresBatteryNotLow;
     }
@@ -226,7 +227,7 @@ class BackgroundFetchConfig extends _AbstractTaskConfig {
             requiresDeviceIdle: requiresDeviceIdle);
 
   Map<String, dynamic> toMap() {
-    Map<String, dynamic> config = super.toMap();
+    var config = super.toMap();
     config['minimumFetchInterval'] = minimumFetchInterval;
     return config;
   }
@@ -275,7 +276,7 @@ class TaskConfig extends _AbstractTaskConfig {
             requiresDeviceIdle: requiresDeviceIdle);
 
   Map<String, dynamic> toMap() {
-    Map<String, dynamic> config = super.toMap();
+    var config = super.toMap();
     config['taskId'] = taskId;
     config['delay'] = delay;
     config['periodic'] = periodic;
@@ -450,8 +451,9 @@ class BackgroundFetch {
         .invokeMethod('configure', config.toMap())
         .then((dynamic status) {
       completer.complete(status);
-    }).catchError((dynamic e) {
-      completer.completeError(e.details);
+    }).catchError((e) {
+      print("[BackgroundFetch] ERROR: $e");
+      completer.completeError(e);
     });
 
     return completer.future as Future<int>;
@@ -653,8 +655,7 @@ void _headlessCallbackDispatcher() {
             '[BackgroundFetch _headlessCallbackDispatcher] ERROR: Failed to get callback from handle: $args');
         return;
       }
-      var task =
-          HeadlessTask(args['task']['taskId'], args['task']['timeout']);
+      var task = HeadlessTask(args['task']['taskId'], args['task']['timeout']);
       callback(task);
     } catch (e, stacktrace) {
       print(

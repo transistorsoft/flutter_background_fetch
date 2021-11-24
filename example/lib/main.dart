@@ -91,6 +91,7 @@ class _MyAppState extends State<MyApp> {
     try {
       var status = await BackgroundFetch.configure(BackgroundFetchConfig(
         minimumFetchInterval: 15,
+        /*
         forceAlarmManager: false,
         stopOnTerminate: false,
         startOnBoot: true,
@@ -100,6 +101,8 @@ class _MyAppState extends State<MyApp> {
         requiresStorageNotLow: false,
         requiresDeviceIdle: false,
         requiredNetworkType: NetworkType.NONE,
+
+         */
       ), _onBackgroundFetch, _onBackgroundFetchTimeout);
       print('[BackgroundFetch] configure success: $status');
       setState(() {
@@ -117,11 +120,8 @@ class _MyAppState extends State<MyApp> {
           stopOnTerminate: false,
           enableHeadless: true
       ));
-    } catch(e) {
+    } on Exception catch(e) {
       print("[BackgroundFetch] configure ERROR: $e");
-      setState(() {
-        _status = e;
-      });
     }
 
     // If the widget was removed from the tree while the asynchronous platform
