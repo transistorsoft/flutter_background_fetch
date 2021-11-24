@@ -47,7 +47,7 @@ public class BackgroundFetchModule implements MethodCallHandler {
     private MethodChannel mMethodChannel;
     private EventChannel mEventChannelTask;
 
-    static BackgroundFetchModule getInstance() {
+    public static BackgroundFetchModule getInstance() {
         if (sInstance == null) {
             sInstance = getInstanceSynchronized();
         }
