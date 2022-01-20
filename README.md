@@ -37,7 +37,7 @@ Background Fetch is a *very* simple plugin which will awaken an app in the backg
 
 ```yaml
 dependencies:
-  background_fetch: '^0.7.0'
+  background_fetch: '^1.0.3'
 ```
 
 ### Or latest from Git:
