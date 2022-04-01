@@ -470,7 +470,7 @@ class BackgroundFetch {
     }).catchError((dynamic e) {
       var message = "Unknown error";
       if (e.details != null) {
-        message = e.details;
+        message = e.details.toString();
       }
       completer.completeError(message);
     });
