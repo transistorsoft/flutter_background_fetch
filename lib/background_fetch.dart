@@ -589,6 +589,7 @@ class BackgroundFetch {
   /// import 'package:background_fetch/background_fetch.dart';
   ///
   /// // This "Headless Task" is run when app is terminated.
+  /// // Headless task should be a top-level or static function
   /// void backgroundFetchHeadlessTask(HeadlessTask task) async {
   ///   String taskId = task.taskId;
   ///   bool isTimeout = task.timeout;
@@ -616,11 +617,17 @@ class BackgroundFetch {
   static Future<bool> registerHeadlessTask(Function callback) async {
     var completer = Completer<bool>();
 
+
+    int? callbackHandler = PluginUtilities.getCallbackHandle(callback)?.toRawHandle();
+
+    if(callbackHandler == null) {
+      print('[BackgroundFetch registerHeadlessTask] ERROR: Failed to get callback id: Check whetever the callback is a op-level or static function');
+    }
     // Two callbacks:  the provided headless-task + _headlessRegistrationCallback
     var args = [
       PluginUtilities.getCallbackHandle(_headlessCallbackDispatcher)!
           .toRawHandle(),
-      PluginUtilities.getCallbackHandle(callback)!.toRawHandle()
+      callbackHandler ?? 0
     ];
 
     _methodChannel
