@@ -58,7 +58,7 @@ buildscript {
 
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {
@@ -69,7 +69,7 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
 +       maven {
 +           // [required] background_fetch
 +           url "${project(':background_fetch').projectDir}/libs"
