@@ -36,7 +36,6 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
   prefs.setString(EVENTS_KEY, jsonEncode(events));
 
   if (taskId == 'flutter_background_fetch') {
-    /* DISABLED:  uncomment to fire a scheduleTask in headlessTask.
     BackgroundFetch.scheduleTask(TaskConfig(
         taskId: "com.transistorsoft.customtask",
         delay: 5000,
@@ -45,7 +44,6 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
         stopOnTerminate: false,
         enableHeadless: true
     ));
-     */
   }
   BackgroundFetch.finish(taskId);
 }
@@ -91,7 +89,6 @@ class _MyAppState extends State<MyApp> {
     try {
       var status = await BackgroundFetch.configure(BackgroundFetchConfig(
         minimumFetchInterval: 15,
-        /*
         forceAlarmManager: false,
         stopOnTerminate: false,
         startOnBoot: true,
@@ -100,9 +97,7 @@ class _MyAppState extends State<MyApp> {
         requiresCharging: false,
         requiresStorageNotLow: false,
         requiresDeviceIdle: false,
-        requiredNetworkType: NetworkType.NONE,
-
-         */
+        requiredNetworkType: NetworkType.NONE
       ), _onBackgroundFetch, _onBackgroundFetchTimeout);
       print('[BackgroundFetch] configure success: $status');
       setState(() {

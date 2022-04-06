@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.1.0 - 2022-04-06
+* [iOS] Fix type-error when .start() raises an error (#281)
+* [Android] Better error-handling when headlessTask is registered incorrectly (#242)
+* [Android] Android 12 compatibility:  Add new required permission android.permission.SCHEDULE_EXACT_ALARM
+
 ## 1.0.3 - 2021-11-24
 * [Fixed][Android] Fix typo related to requiredNetworkType, causing null pointer error.
 
