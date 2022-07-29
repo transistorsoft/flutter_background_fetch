@@ -213,7 +213,7 @@ class _MyAppState extends State<MyApp> {
 
 ### Executing Custom Tasks
 
-In addition to the default background-fetch task defined by `BackgroundFetch.configure`, you may also execute your own arbitrary "oneshot" or periodic tasks (iOS requires additional [Setup Instructions](./help/INSTALL-IOS.md)).  However, all events will be fired into the Callback provivded to **`BackgroundFetch#configure`**:
+In addition to the default background-fetch task defined by `BackgroundFetch.configure`, you may also execute your own arbitrary "oneshot" or periodic tasks (iOS requires additional [Setup Instructions](./help/INSTALL-IOS.md)).  However, all events will be fired into the Callback provided to **`BackgroundFetch#configure`**:
 
 ### ⚠️ iOS:  
 - `scheduleTask` on *iOS* seems only to run when the device is plugged into power.
