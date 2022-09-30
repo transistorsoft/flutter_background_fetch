@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.1.1 - 2022-09-30
+* [Android] Use `LifecycleManager` for modern headless-detection instead of legacy mechanism requiring permission `GET_TASKS`.
+
 ## 1.1.0 - 2022-04-06
 * [iOS] Fix type-error when .start() raises an error (#281)
 * [Android] Better error-handling when headlessTask is registered incorrectly (#242)

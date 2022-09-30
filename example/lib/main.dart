@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:http/http.dart' as http;
+
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -137,19 +139,17 @@ class _MyAppState extends State<MyApp> {
     prefs.setString(EVENTS_KEY, jsonEncode(_events));
 
     if (taskId == "flutter_background_fetch") {
-      // Schedule a one-shot task when fetch event received (for testing).
-      /*
-      BackgroundFetch.scheduleTask(TaskConfig(
-          taskId: "com.transistorsoft.customtask",
-          delay: 5000,
-          periodic: false,
-          forceAlarmManager: true,
-          stopOnTerminate: false,
-          enableHeadless: true,
-          requiresNetworkConnectivity: true,
-          requiresCharging: true
-      ));
-       */
+      // Perform an example HTTP request.
+      var url = Uri.https('www.googleapis.com', '/books/v1/volumes', {'q': '{http}'});
+
+      var response = await http.get(url);
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+        var itemCount = jsonResponse['totalItems'];
+        print('Number of books about http: $itemCount.');
+      } else {
+        print('Request failed with status: ${response.statusCode}.');
+      }
     }
     // IMPORTANT:  You must signal completion of your fetch task or the OS can punish your app
     // for taking too long in the background.
