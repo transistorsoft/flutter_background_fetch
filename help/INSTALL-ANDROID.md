@@ -29,18 +29,6 @@ Execution failed for task ':app:processDebugManifest'.
     Suggestion: add 'tools:replace="android:label"' to <application> element at AndroidManifest.xml:15:5-38:19 to override.
 ```
 
-## `android/gradle.properties`
-
-Ensure your app is [migrated to use AndroidX](https://flutter.dev/docs/development/packages-and-plugins/androidx-compatibility).
-
-:open_file_folder: `android/gradle.properties`:
-
-```diff
-org.gradle.jvmargs=-Xmx1536M
-+android.enableJetifier=true
-+android.useAndroidX=true
-```
-
 ## `android/build.gradle`
 
 As an app grows in complexity and imports a variety of 3rd-party modules, it helps to provide some key **"Global Gradle Configuration Properties"** which all modules can align their requested dependency versions to.  `background_fetch` **is aware** of these variables and will align itself to them when detected.
@@ -49,21 +37,12 @@ As an app grows in complexity and imports a variety of 3rd-party modules, it hel
 
 ```diff
 buildscript {
-+   ext.kotlin_version = '1.3.72'               // or latest
+    ext.kotlin_version = '1.3.72'               // or latest
 +   ext {
-+       compileSdkVersion   = 30                // or latest
-+       targetSdkVersion    = 30                // or latest
-+       appCompatVersion    = "1.1.0"           // or latest
++       compileSdkVersion   = 31                // or latest
++       targetSdkVersion    = 31                // or latest
++       appCompatVersion    = "1.4.2"           // or latest
 +   }
-
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-+        classpath 'com.android.tools.build:gradle:3.3.1' // Must use 3.3.1 or higher.  4.x is fine.
-    }
 }
 
 allprojects {
