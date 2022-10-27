@@ -65,6 +65,8 @@ class _AbstractTaskConfig {
   /// import 'package:background_fetch/background_fetch.dart';
   ///
   /// // This "Headless Task" is run when app is terminated.
+  /// // Be sure to annotate your callback function to avoid issues in release mode on Flutter >= 3.3.0
+  /// @pragma('vm:entry-point')
   /// void backgroundFetchHeadlessTask(HeadlessTask task) async {
   ///   String taskId = task.taskId;
   ///   bool isTimeout = task.timeout;
@@ -646,6 +648,7 @@ class BackgroundFetch {
 
 /// Headless Callback Dispatcher
 ///
+@pragma('vm:entry-point')
 void _headlessCallbackDispatcher() {
   WidgetsFlutterBinding.ensureInitialized();
   const _headlessChannel =
