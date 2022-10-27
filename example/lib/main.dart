@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 const EVENTS_KEY = "fetch_events";
 
 /// This "Headless Task" is run when app is terminated.
+@pragma('vm:entry-point')
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
   var taskId = task.taskId;
   var timeout = task.timeout;

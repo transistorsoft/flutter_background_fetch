@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.1.2 - 2022-10-27
+* [Android] add `@pragma('vm:entry-point') to lib's `_headlessCallbackDispatcher`, required for *release* builds on Flutter >= 3.3.0.
+
 ## 1.1.1 - 2022-09-30
 * [Android] Use `LifecycleManager` for modern headless-detection instead of legacy mechanism requiring permission `GET_TASKS`.
 
