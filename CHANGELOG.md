@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.1.3 - 2023-01-10
+* [Android] Fix error `FlutterJNI was detached from native C++` when Android back button is pressed.  In this case, Flutter detaches the `MainActivity` from the app and headless-mode was not being detected.
+
 ## 1.1.2 - 2022-10-27
 * [Android] add `@pragma('vm:entry-point')` to lib's `_headlessCallbackDispatcher`, required for *release* builds on Flutter >= 3.3.0.
 
