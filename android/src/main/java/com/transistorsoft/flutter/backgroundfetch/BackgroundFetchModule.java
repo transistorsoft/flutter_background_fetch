@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.transistorsoft.tsbackgroundfetch.BackgroundFetch;
 import com.transistorsoft.tsbackgroundfetch.BackgroundFetchConfig;
+import com.transistorsoft.tsbackgroundfetch.LifecycleManager;
 
 import java.util.HashMap;
 import java.util.List;
@@ -74,12 +75,19 @@ public class BackgroundFetchModule implements MethodCallHandler {
 
     void onDetachedFromEngine() {
         mIsAttachedToEngine.set(false);
+        mMethodChannel.setMethodCallHandler(null);
+        mMethodChannel = null;
     }
 
     void setActivity(Activity activity) {
         if (activity != null) {
+            LifecycleManager.getInstance().setHeadless(false);
             mEventChannelTask = new EventChannel(mMessenger, EVENT_CHANNEL_NAME);
             mEventChannelTask.setStreamHandler(mFetchCallback);
+        } else {
+            LifecycleManager.getInstance().setHeadless(true);
+            mEventChannelTask.setStreamHandler(null);
+            mEventChannelTask = null;
         }
     }
 
