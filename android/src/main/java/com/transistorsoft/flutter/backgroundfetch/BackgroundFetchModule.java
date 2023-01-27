@@ -75,7 +75,9 @@ public class BackgroundFetchModule implements MethodCallHandler {
 
     void onDetachedFromEngine() {
         mIsAttachedToEngine.set(false);
-        mMethodChannel.setMethodCallHandler(null);
+        if(mMethodChannel!=null){
+          mMethodChannel.setMethodCallHandler(null);  
+        }
         mMethodChannel = null;
     }
 
