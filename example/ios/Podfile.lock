@@ -1,27 +1,28 @@
 PODS:
-  - background_fetch (1.1.3):
+  - background_fetch (1.1.4):
     - Flutter
   - Flutter (1.0.0)
-  - shared_preferences (0.0.1):
+  - shared_preferences_foundation (0.0.1):
     - Flutter
+    - FlutterMacOS
 
 DEPENDENCIES:
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - Flutter (from `Flutter`)
-  - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/ios`)
 
 EXTERNAL SOURCES:
   background_fetch:
     :path: ".symlinks/plugins/background_fetch/ios"
   Flutter:
     :path: Flutter
-  shared_preferences:
-    :path: ".symlinks/plugins/shared_preferences/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/ios"
 
 SPEC CHECKSUMS:
-  background_fetch: 288964b65f90a1ea4e97e426647b518dffd64b7b
+  background_fetch: bd64e544b303ee4cd4cf2fe8cb2187b72aecf9ca
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  shared_preferences: 5033afbb22d372e15aff8ff766df9021b845f273
+  shared_preferences_foundation: 297b3ebca31b34ec92be11acd7fb0ba932c822ca
 
 PODFILE CHECKSUM: e5ee00144d04e7b168ba7ea28a9753540e444f3d
 

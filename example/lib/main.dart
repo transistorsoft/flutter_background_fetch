@@ -186,6 +186,15 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _status = status;
     });
+    // Invoke a scheduleTask for testing
+    BackgroundFetch.scheduleTask(TaskConfig(
+        taskId: "com.transistorsoft.customtask",
+        delay: 10000,
+        periodic: false,
+        forceAlarmManager: false,
+        stopOnTerminate: false,
+        enableHeadless: true
+    ));
   }
 
   void _onClickClear() async {
