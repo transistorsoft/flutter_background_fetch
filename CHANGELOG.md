@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.1.5 - 2023-02-16
+* [Android] Fix NPE in `mEventChannelTask` in certain situations.  See #322.
+
 ## 1.1.4 - 2022-01-28
 * [Android] [Fix] Add a null-check in didDetachFromEngine, fixing a reported null-pointer exception.
 * [Android] [Added] Log the jobId when .scheduleTask is called so that developers can simulate events with `adb shell`.
