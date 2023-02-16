@@ -88,7 +88,9 @@ public class BackgroundFetchModule implements MethodCallHandler {
             mEventChannelTask.setStreamHandler(mFetchCallback);
         } else {
             LifecycleManager.getInstance().setHeadless(true);
-            mEventChannelTask.setStreamHandler(null);
+            if (mEventChannelTask != null) {
+                mEventChannelTask.setStreamHandler(null);
+            }
             mEventChannelTask = null;
         }
     }
