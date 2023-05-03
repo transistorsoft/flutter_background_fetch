@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.1.6 - 2023-05-03
+* [Android] Gradle v8 now requires `namespace` attribute in gradle files.
+
 ## 1.1.5 - 2023-02-16
 * [Android] Fix NPE in `mEventChannelTask` in certain situations.  See #322.
 
