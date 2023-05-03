@@ -32,6 +32,10 @@ def safeExtGet(prop, fallback) {
 }
 
 android {
+    if (project.android.hasProperty("namespace")) {
+        namespace("com.transistorsoft.flutter.backgroundfetch")
+    }
+
     compileSdkVersion safeExtGet('compileSdkVersion', 28)
 
     defaultConfig {
