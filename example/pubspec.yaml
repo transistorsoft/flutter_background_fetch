@@ -7,19 +7,19 @@ description: Demonstrates how to use the background_fetch plugin.
 # Both the version and the builder number may be overridden in flutter
 # build by specifying --build-name and --build-number, respectively.
 # Read more about versioning at semver.org.
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
-  sdk: ">=2.6.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  shared_preferences: ^2.0.0-nullsafety
-  http: ^0.13.4
+  shared_preferences: ^2.2.0
+  http: ^1.1.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.2
+  cupertino_icons: ^1.0.5
 
 dev_dependencies:
   test: ^1.5.1
