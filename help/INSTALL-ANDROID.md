@@ -90,7 +90,7 @@ android {
       .
       .
       .
-  </platform>
+  </manifest>
 ```
 :warning: It has been announced that *Google Play Store* [has plans to impose greater scrutiny](https://support.google.com/googleplay/android-developer/answer/13161072?sjid=3640341614632608469-NA) over usage of this permission (which is why the plugin does not automatically add it).
 
