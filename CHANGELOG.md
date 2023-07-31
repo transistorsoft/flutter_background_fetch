@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 1.2.0 - 2023-07-30
+* [Android] Android 14 (SDK 34) support..
+* [Android] Android 14 support:  When using `forceAlarmManager: true`, you must now optionally add the permission `android.permission.SCHEDULE_EXACT_ALARM` to your `AndroidManifest` to schedule **exact** alarms.  Otherwise `AlarmManager` will use **in-exact** alarms.
+:open_file_folder: `AndroidManifest`.   **NOTE** You must include the permission **exactly as-shown** with __`android:minSdkVersion="34"`__.
+```xml
+<manifest>
+    <!-- [background-fetch] OPTIONAL:  allows forceAlarmManager: true to use exact alarms -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="33" />
+    .
+    .
+    .
+</manifest>
+
+* [Android] Fix an issue booting the app with `flutter run` with screen off where plugin incorrectly detects the app is headless.
+
 ## 1.1.6 - 2023-05-03
 * [Android] Gradle v8 now requires `namespace` attribute in gradle files.
 

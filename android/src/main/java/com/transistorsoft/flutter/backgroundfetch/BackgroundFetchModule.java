@@ -65,6 +65,8 @@ public class BackgroundFetchModule implements MethodCallHandler {
     }
 
     void onAttachedToEngine(Context context, BinaryMessenger messenger) {
+        // Poke BackgroundFetch alive once Context is received
+        BackgroundFetch.getInstance(context);
         mIsAttachedToEngine.set(true);
         mMessenger = messenger;
         mContext = context;
@@ -83,6 +85,7 @@ public class BackgroundFetchModule implements MethodCallHandler {
 
     void setActivity(Activity activity) {
         if (activity != null) {
+            // Inform BackgroundFetch LifecycleManager that we're not Headless (an Activity exists).
             LifecycleManager.getInstance().setHeadless(false);
             mEventChannelTask = new EventChannel(mMessenger, EVENT_CHANNEL_NAME);
             mEventChannelTask.setStreamHandler(mFetchCallback);
