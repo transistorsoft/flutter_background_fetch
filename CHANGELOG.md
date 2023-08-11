@@ -12,6 +12,7 @@
     .
     .
 </manifest>
+```
 
 * [Android] Fix an issue booting the app with `flutter run` with screen off where plugin incorrectly detects the app is headless.
 
