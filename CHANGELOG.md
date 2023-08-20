@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [1.2.1] &mdash; 2023-08-20
+* [Android] Detect and dispose of duplicate events.  Android `JobService` has a bug for devices running <= Android M where multiple `backgrou
+nd-fetch` events could fire within the same second.
+
 ## 1.2.0 - 2023-07-30
 * [Android] Android 14 (SDK 34) support..
 * [Android] Android 14 support:  When using `forceAlarmManager: true`, you must now optionally add the permission `android.permission.SCHEDULE_EXACT_ALARM` to your `AndroidManifest` to schedule **exact** alarms.  Otherwise `AlarmManager` will use **in-exact** alarms.
