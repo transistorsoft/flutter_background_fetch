@@ -38,7 +38,6 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
 
     private Context mContext;
     // Deprecated 1.12.0
-    private static PluginRegistry.PluginRegistrantCallback sPluginRegistrantCallback;
     private static FlutterEngine sBackgroundFlutterEngine;
 
     private static final AtomicBoolean sHeadlessTaskRegistered = new AtomicBoolean(false);
@@ -50,11 +49,6 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
     private BGTask mTask;
 
     private static final List<OnInitializedCallback> sOnInitializedListeners = new ArrayList<>();
-
-    // Called by Application#onCreate
-    static void setPluginRegistrant(PluginRegistry.PluginRegistrantCallback callback) {
-        sPluginRegistrantCallback = callback;
-    }
 
     // Called by BackgroundFetchModule
     static boolean register(final Context context, final List<Object> callbacks) {
@@ -147,12 +141,6 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
             }
             DartExecutor.DartCallback dartCallback = new DartExecutor.DartCallback(assets, appBundlePath, callbackInfo);
             executor.executeDartCallback(dartCallback);
-
-            // The pluginRegistrantCallback should only be set in the V1 embedding as
-            // plugin registration is done via reflection in the V2 embedding.
-            if (sPluginRegistrantCallback != null) {
-                sPluginRegistrantCallback.registerWith(new ShimPluginRegistry(sBackgroundFlutterEngine));
-            }
         }
     }
 

@@ -11,20 +11,6 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 public class BackgroundFetchPlugin implements FlutterPlugin, ActivityAware {
     public static final String TAG                          = "TSBackgroundFetch";
 
-    // @deprecated Not used by v2.
-    public static void registerWith(Registrar registrar) {
-        BackgroundFetchModule module = BackgroundFetchModule.getInstance();
-        module.onAttachedToEngine(registrar.context(), registrar.messenger());
-        if (registrar.activity() != null) {
-            module.setActivity(registrar.activity());
-        }
-    }
-
-    // @deprecated Called by Application#onCreate
-    public static void setPluginRegistrant(PluginRegistry.PluginRegistrantCallback callback) {
-        HeadlessTask.setPluginRegistrant(callback);
-    }
-
     public BackgroundFetchPlugin() { }
 
     @Override

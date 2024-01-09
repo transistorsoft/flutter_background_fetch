@@ -21,7 +21,7 @@
 
 3.  If you intend to execute your own [custom tasks](#executing-custom-tasks) via **`BackgroundFetch.scheduleTask`**, you must add those custom identifiers as well.  For example, if you intend to execute a custom **`taskId: 'com.transistorsoft.customtask'`**, you must add the identifier **`com.transistorsoft.customtask`** to your *"Permitted background task scheduler identifiers"*, as well.
 
-:warning: A task identifier can be any string you wish, but it's a good idea to prefix them now with `com.transistorsoft.` &mdash;  In the future, the `com.transistorsoft` prefix **may become required**.
+:warning: Your custom  task identifiers **MUST** be prefixed with `com.transistorsoft.`.
 
 ```dart
 BackgroundFetch.scheduleTask(TaskConfig(
