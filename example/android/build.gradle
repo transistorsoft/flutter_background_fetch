@@ -1,19 +1,7 @@
-buildscript {
-    ext.kotlin_version = '1.7.10'
-    ext {
-        compileSdkVersion   = 33
-        targetSdkVersion    = 33
-        supportLibVersion   = "1.6.1"
-    }
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
+ext {
+    compileSdkVersion   = 34
+    targetSdkVersion    = 34
+    appCompatVersion    = "1.6.1"
 }
 
 allprojects {

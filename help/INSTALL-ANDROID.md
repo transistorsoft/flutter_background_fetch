@@ -29,39 +29,50 @@ Execution failed for task ':app:processDebugManifest'.
     Suggestion: add 'tools:replace="android:label"' to <application> element at AndroidManifest.xml:15:5-38:19 to override.
 ```
 
-## `android/build.gradle`
+## :open_file_folder: `android/build.gradle`
+- Add the following **required** `maven` repo urls:
 
-As an app grows in complexity and imports a variety of 3rd-party modules, it helps to provide some key **"Global Gradle Configuration Properties"** which all modules can align their requested dependency versions to.  `background_fetch` **is aware** of these variables and will align itself to them when detected.
+```diff
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
++       // [required] background_fetch
++       maven { url "${project(':background_fetch').projectDir}/libs" }
+    }
+}
+```
 
-:open_file_folder: `android/build.gradle`:
+- #### If you're using `flutter >= 3.19.0` ([New Android Architecture](https://docs.flutter.dev/release/breaking-changes/flutter-gradle-plugin-apply)):
+
+
+```diff
++ext {
++    compileSdkVersion   = 33                // or higher / as desired
++    targetSdkVersion    = 33                // or higher / as desired
++    appCompatVersion    = "1.4.2"           // or higher / as desired
++ }
+
+```
+
+- #### Otherwise for `flutter < 3.19.0` (Old Android Architecture):
 
 ```diff
 buildscript {
     ext.kotlin_version = '1.3.72'               // or latest
 +   ext {
-+       compileSdkVersion   = 31                // or latest
-+       targetSdkVersion    = 31                // or latest
-+       appCompatVersion    = "1.4.2"           // or latest
++       compileSdkVersion   = 33                // or higher / as desired
++       targetSdkVersion    = 33                // or higher / as desired
++       appCompatVersion    = "1.4.2"           // or higher / as desired
 +   }
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-+       maven {
-+           // [required] background_fetch
-+           url "${project(':background_fetch').projectDir}/libs"
-+       }
-    }
-}
+
 ```
 
-## `android/app/build.gradle`
+## :open_file_folder: `android/app/build.gradle`
 
-In addition, you should take advantage of the *Global Configuration Properties* **yourself**, replacing hard-coded values in your `android/app/build.gradle` with references to these variables:
-
-:open_file_folder: `android/app/build.gradle`:
+:exclamation: __DO NOT OMIT ANY OF THE FOLLOWING CHANGES__ :exclamation:
 
 ```diff
 android {
@@ -73,6 +84,7 @@ android {
         .
         .
         .
++       minSdkVersion rootProject.ext.minSdkVersion
 +       targetSdkVersion rootProject.ext.targetSdkVersion
     }
 }

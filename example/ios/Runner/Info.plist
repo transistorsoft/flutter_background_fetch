@@ -4,7 +4,6 @@
 <dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>com.motherfucker.task</string>
 		<string>com.transistorsoft.customtask</string>
 		<string>com.transistorsoft.fetch</string>
 	</array>
