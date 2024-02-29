@@ -142,6 +142,8 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
 
 - (void) scheduleTask:(NSDictionary*)config result:(FlutterResult)result {
     NSString *taskId = [config objectForKey:@"taskId"];
+    NSInteger taskType = [[config objectForKey:@"type"] intValue];
+    
     long delayMS = [[config objectForKey:@"delay"] longValue];
     NSTimeInterval delay = delayMS / 1000;
     BOOL periodic = [[config objectForKey:@"periodic"] boolValue];
@@ -149,6 +151,7 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
     BOOL requiresNetwork = ([config objectForKey:@"requiresNetworkConnectivity"]) ? [[config objectForKey:@"requiresNetworkConnectivity"] boolValue] : NO;
 
     NSError *error = [[TSBackgroundFetch sharedInstance] scheduleProcessingTaskWithIdentifier:taskId
+                                                                                         type: taskType
                                                                                         delay:delay
                                                                                      periodic:periodic
                                                                         requiresExternalPower: requiresCharging
@@ -190,7 +193,7 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
 }
 
 -(void (^)(NSString* taskId, BOOL timeout)) createTaskCallback {
-    return ^void(NSString* taskId, BOOL timeout){
+    return ^void(NSString* taskId, BOOL timeout){        
         if (self->eventSink != nil) {
             self->eventSink(@{
                 @"taskId": taskId,

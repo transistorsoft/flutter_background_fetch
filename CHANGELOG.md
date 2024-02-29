@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.2.3 &mdash; 2024-02-09
+* [iOS] ensure `scheduleTask` callback is executed on main-thread.
+* [Android] Update Android Setup Instructions for `flutter >= 3.19.0` (New Android Architecture).
+
 ## 1.2.2 &mdash; 2024-01-09
 * [iOS] Only allow registration of `BGProcessingTasks` (*Permitted background task scheduler identifiers*) in `Info.plist` which are prefixed with `com.transistorsoft`.  Any other task identifier will be ignored.
 * [Android] Remove deprecated `registerWith` V1 flutter plugin architecture.

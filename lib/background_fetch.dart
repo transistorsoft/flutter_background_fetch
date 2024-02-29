@@ -8,6 +8,8 @@ const _PLUGIN_PATH = "com.transistorsoft/flutter_background_fetch";
 const _METHOD_CHANNEL_NAME = "$_PLUGIN_PATH/methods";
 const _EVENT_CHANNEL_NAME = "$_PLUGIN_PATH/events";
 
+enum TaskType { DEFAULT, HEALTH_RESEARCH }
+
 /// Available NetworkType for use with [AbstractTaskConfig.networkType].
 enum NetworkType {
   /// This job doesn't care about network constraints, either any or none.
@@ -238,6 +240,8 @@ class BackgroundFetchConfig extends _AbstractTaskConfig {
 /// Configuration object provided to [scheduleTask]
 ///
 class TaskConfig extends _AbstractTaskConfig {
+  TaskType type;
+
   /// Unique taskId.  This `taskId` will be provided to the BackgroundFetch callback function for use with [BackgroundFetch.finish].
   String taskId;
 
@@ -256,6 +260,7 @@ class TaskConfig extends _AbstractTaskConfig {
       {required this.taskId,
       required this.delay,
       this.periodic = false,
+      this.type = TaskType.DEFAULT,
       bool? stopOnTerminate,
       bool? startOnBoot,
       bool? enableHeadless,
@@ -283,6 +288,7 @@ class TaskConfig extends _AbstractTaskConfig {
     config['delay'] = delay;
     config['periodic'] = periodic;
     config['requiresNetworkConnectivity'] = requiresNetworkConnectivity;
+    config['type'] = type.index;
     return config;
   }
 }
