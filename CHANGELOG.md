@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.2.4 &mdash; 2024-03-07
+* [iOS] Remove reference to symbol `BGHealthResearchTask` for now
+
 ## 1.2.3 &mdash; 2024-02-09
 * [iOS] ensure `scheduleTask` callback is executed on main-thread.
 * [Android] Update Android Setup Instructions for `flutter >= 3.19.0` (New Android Architecture).
