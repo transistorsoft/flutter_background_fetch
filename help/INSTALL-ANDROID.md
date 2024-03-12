@@ -84,7 +84,6 @@ android {
         .
         .
         .
-+       minSdkVersion rootProject.ext.minSdkVersion
 +       targetSdkVersion rootProject.ext.targetSdkVersion
     }
 }
