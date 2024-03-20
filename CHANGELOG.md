@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.3.0 &mdash; 2024-03-19
+* [iOS] Implement new [iOS Privacy Manifest](https://developer.apple.com/documentation/bundleresources/privacy_manifest_files?language=objc)
+
 ## 1.2.4 &mdash; 2024-03-07
 * [iOS] Remove reference to symbol `BGHealthResearchTask` for now
 
