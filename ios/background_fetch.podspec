@@ -19,6 +19,5 @@ Pod::Spec.new do |s|
   s.dependency 'Flutter'
   s.vendored_frameworks = ['TSBackgroundFetch.xcframework']
   s.ios.deployment_target = '8.0'
-  s.resource_bundles = {'TSBackgroundFetch' => ['Resources/PrivacyInfo.xcprivacy']}
 end
 
