@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.3.2 &mdash; 2024-03-23
+* [iOS] codesign `TSBackgroundFetch.xcframework`.
+* [iOS] Add `PrivacyInfo.xcprivacy` into `.podfile` config.
+  
 ## 1.3.1 &mdash; 2024-03-20
 * [iOS] Move `PrivacyInfo` -> `TSBackgroundFetch.xcframework`.
 
