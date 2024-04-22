@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.3.3 &mdash; 2024-04-22
+* [iOS] Code-sign `TSBackgroundFetch.xcframework` with new Apple Organization (*9224-2932 Quebec Inc*) certificate.
+
 ## 1.3.2 &mdash; 2024-03-23
 * [iOS] codesign `TSBackgroundFetch.xcframework`.
 * [iOS] Add `PrivacyInfo.xcprivacy` into `.podfile` config.
