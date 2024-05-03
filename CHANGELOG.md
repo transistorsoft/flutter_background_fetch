@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.3.4 &mdash; 2024-05-03
+* Change return-type of `BackgroundFetch.finish` from `void` to `Future<void>`.
+
 ## 1.3.3 &mdash; 2024-04-22
 * [iOS] Code-sign `TSBackgroundFetch.xcframework` with new Apple Organization (*9224-2932 Quebec Inc*) certificate.
 

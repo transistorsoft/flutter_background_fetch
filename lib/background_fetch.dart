@@ -578,8 +578,8 @@ class BackgroundFetch {
   ///
   ///
   ///
-  static void finish(String taskId) {
-    _methodChannel.invokeMethod('finish', taskId);
+  static Future<void> finish(String taskId) async {
+    return await _methodChannel.invokeMethod('finish', taskId);
   }
 
   /// __Android-only__:  Registers a global function to execute when your app has been terminated.
