@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.3.5 &mdash; 2024-05-27
+* Update analysis_options.yaml for pub.dev.  There are no code changes from 1.3.4.
+
 ## 1.3.4 &mdash; 2024-05-03
 * Change return-type of `BackgroundFetch.finish` from `void` to `Future<void>`.
 
