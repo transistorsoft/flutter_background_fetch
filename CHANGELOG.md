@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+* [Android] Add `@NonNull` annotations to flutter plugin methods.
+* [Android] Enable `multidex` in Android /example.
+
 ## 1.3.5 &mdash; 2024-05-27
 * Update analysis_options.yaml for pub.dev.  There are no code changes from 1.3.4.
 

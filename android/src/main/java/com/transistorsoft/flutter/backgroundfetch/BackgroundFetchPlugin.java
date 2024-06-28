@@ -4,8 +4,6 @@ import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
-import io.flutter.plugin.common.PluginRegistry;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /** BackgroundFetchPlugin */
 public class BackgroundFetchPlugin implements FlutterPlugin, ActivityAware {
@@ -14,7 +12,7 @@ public class BackgroundFetchPlugin implements FlutterPlugin, ActivityAware {
     public BackgroundFetchPlugin() { }
 
     @Override
-    public void onAttachedToEngine(FlutterPlugin.FlutterPluginBinding binding) {
+    public void onAttachedToEngine(@NonNull FlutterPlugin.FlutterPluginBinding binding) {
         BackgroundFetchModule.getInstance().onAttachedToEngine(binding.getApplicationContext(), binding.getBinaryMessenger());
     }
 
@@ -24,7 +22,7 @@ public class BackgroundFetchPlugin implements FlutterPlugin, ActivityAware {
     }
 
     @Override
-    public void onAttachedToActivity(ActivityPluginBinding activityPluginBinding) {
+    public void onAttachedToActivity(@NonNull ActivityPluginBinding activityPluginBinding) {
         BackgroundFetchModule.getInstance().setActivity(activityPluginBinding.getActivity());
     }
 
