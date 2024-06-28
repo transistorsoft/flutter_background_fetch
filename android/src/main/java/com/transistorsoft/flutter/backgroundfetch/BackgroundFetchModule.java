@@ -39,12 +39,12 @@ public class BackgroundFetchModule implements MethodCallHandler {
 
     private static final String HEADLESS_JOB_SERVICE_CLASS = HeadlessTask.class.getName();
 
-    private FetchStreamHandler mFetchCallback;
+    private final FetchStreamHandler mFetchCallback;
 
     private Context mContext;
 
     private BinaryMessenger mMessenger;
-    private AtomicBoolean mIsAttachedToEngine = new AtomicBoolean(false);
+    private final AtomicBoolean mIsAttachedToEngine = new AtomicBoolean(false);
     private MethodChannel mMethodChannel;
     private EventChannel mEventChannelTask;
 
@@ -100,7 +100,7 @@ public class BackgroundFetchModule implements MethodCallHandler {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void onMethodCall(MethodCall call, @NonNull Result result) {
+    public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         if (call.method.equals(BackgroundFetch.ACTION_CONFIGURE)) {
             Map<String, Object> params = (Map<String, Object>) call.arguments;
             configure(params, result);
@@ -131,7 +131,7 @@ public class BackgroundFetchModule implements MethodCallHandler {
         }
     }
 
-    private void configure(Map<String, Object> params, Result result) {
+    private void configure(Map<String, Object> params, @NonNull Result result) {
         BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
         adapter.configure(buildConfig(params)
                 .setTaskId(FETCH_TASK_ID)
@@ -141,19 +141,19 @@ public class BackgroundFetchModule implements MethodCallHandler {
         result.success(adapter.status());
     }
 
-    private void start(Result result) {
+    private void start(@NonNull Result result) {
         BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
         adapter.start(FETCH_TASK_ID);
         result.success(adapter.status());
     }
 
-    private void stop(@Nullable String taskId, Result result) {
+    private void stop(@Nullable String taskId, @NonNull Result result) {
         BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
         adapter.stop(taskId);
         result.success(adapter.status());
     }
 
-    private void status(Result result) {
+    private void status(@NonNull Result result) {
         BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
         result.success(adapter.status());
     }
@@ -166,13 +166,14 @@ public class BackgroundFetchModule implements MethodCallHandler {
         result.success(true);
     }
 
-    private void scheduleTask(Map<String, Object> params, Result result) {
+    private void scheduleTask(Map<String, Object> params, @NonNull Result result) {
         BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
         adapter.scheduleTask(buildConfig(params).build());
         result.success(true);
     }
 
-    private BackgroundFetchConfig.Builder buildConfig(Map<String, Object>params) {
+    @NonNull
+    private BackgroundFetchConfig.Builder buildConfig(@NonNull Map<String, Object>params) {
         BackgroundFetchConfig.Builder config = new BackgroundFetchConfig.Builder();
 
         if (params.containsKey(BackgroundFetchConfig.FIELD_TASK_ID)) {
