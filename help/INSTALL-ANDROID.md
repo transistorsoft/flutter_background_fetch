@@ -50,7 +50,6 @@ allprojects {
 +ext {
 +    compileSdkVersion   = 33                // or higher / as desired
 +    targetSdkVersion    = 33                // or higher / as desired
-+    appCompatVersion    = "1.4.2"           // or higher / as desired
 + }
 
 ```
@@ -63,7 +62,6 @@ buildscript {
 +   ext {
 +       compileSdkVersion   = 33                // or higher / as desired
 +       targetSdkVersion    = 33                // or higher / as desired
-+       appCompatVersion    = "1.4.2"           // or higher / as desired
 +   }
 }
 
