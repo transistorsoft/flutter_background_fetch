@@ -22,11 +22,9 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.loader.ApplicationInfoLoader;
 import io.flutter.embedding.engine.loader.FlutterApplicationInfo;
-import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistry;
 import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
-import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.view.FlutterCallbackInformation;
 
 @Keep
@@ -35,7 +33,6 @@ public class HeadlessTask implements MethodChannel.MethodCallHandler, Runnable {
     private static final String KEY_CLIENT_CALLBACK_ID          = "clientCallbackId";
     private static final String METHOD_CHANNEL_NAME             = BackgroundFetchModule.PLUGIN_ID + "/headless";
     private static final String ACTION_INITIALIZED              = "initialized";
-
     private Context mContext;
     // Deprecated 1.12.0
     private static FlutterEngine sBackgroundFlutterEngine;

@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.3.7 &mdash; 2024-09-09
+* [Android] Removed unused `import` related to Flutter V1 embedding.
+
 ## 1.3.6 &mdash; 2024-09-06
 * [Android] Remove unrequired dependency `appcompat`.
 * [Android] Bump default `androidx.lifecycle:lifecycle-runtime` version to `2.7.0`.
