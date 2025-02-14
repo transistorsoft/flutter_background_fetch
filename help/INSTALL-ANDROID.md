@@ -20,7 +20,8 @@ Flutter seems to have a problem with 3rd-party Android libraries which merge the
 
 ```
 
-##### ⚠️ Failure to perform the step above will result in a **build error**
+> [!WARNING]
+> Failure to perform the step above will result in a **build error**: __`Manifest merger failed`__
 
 ```
 Execution failed for task ':app:processDebugManifest'.
@@ -29,8 +30,16 @@ Execution failed for task ':app:processDebugManifest'.
     Suggestion: add 'tools:replace="android:label"' to <application> element at AndroidManifest.xml:15:5-38:19 to override.
 ```
 
-## :open_file_folder: `android/build.gradle`
-- Add the following **required** `maven` repo urls:
+## :open_file_folder: `android/build.gradle` / `android/build.gradle.kts`
+
+> [!NOTE]
+> At the root of your `/android` folder, your Flutter app will contain __one__ of the following files:
+> - __`build.gradle`__
+> - __`build.gradle.kts`__ (new Kotlin-based version)
+>
+> Add the following **required** `maven` repo url to **whichever file** your app has:
+
+#### `build.gradle`
 
 ```diff
 allprojects {
@@ -43,49 +52,21 @@ allprojects {
 }
 ```
 
-- #### If you're using `flutter >= 3.19.0` ([New Android Architecture](https://docs.flutter.dev/release/breaking-changes/flutter-gradle-plugin-apply)):
+#### `build.gradle.kts`
 
 
 ```diff
-+ext {
-+    compileSdkVersion   = 33                // or higher / as desired
-+    targetSdkVersion    = 33                // or higher / as desired
-+ }
-
-```
-
-- #### Otherwise for `flutter < 3.19.0` (Old Android Architecture):
-
-```diff
-buildscript {
-    ext.kotlin_version = '1.3.72'               // or latest
-+   ext {
-+       compileSdkVersion   = 33                // or higher / as desired
-+       targetSdkVersion    = 33                // or higher / as desired
-+   }
-}
-
-
-```
-
-## :open_file_folder: `android/app/build.gradle`
-
-:exclamation: __DO NOT OMIT ANY OF THE FOLLOWING CHANGES__ :exclamation:
-
-```diff
-android {
-+   compileSdkVersion rootProject.ext.compileSdkVersion
-    .
-    .
-    .
-    defaultConfig {
-        .
-        .
-        .
-+       targetSdkVersion rootProject.ext.targetSdkVersion
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
++       // [required] background_fetch
++       maven(url = "${project(":background_fetch").projectDir}/libs")
     }
 }
 ```
+
+
 
 ## Precise event-scheduling with `forceAlarmManager: true`:
 

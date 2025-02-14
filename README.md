@@ -60,7 +60,6 @@ dependencies:
 ```dart
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:background_fetch/background_fetch.dart';
 
@@ -71,12 +70,12 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
   String taskId = task.taskId;
   bool isTimeout = task.timeout;
   if (isTimeout) {
-    // This task has exceeded its allowed running-time.  
+    // This task has exceeded its allowed running-time.
     // You must stop what you're doing and immediately .finish(taskId)
     print("[BackgroundFetch] Headless task timed-out: $taskId");
     BackgroundFetch.finish(taskId);
     return;
-  }  
+  }
   print('[BackgroundFetch] Headless event received.');
   // Do your work here...
   BackgroundFetch.finish(taskId);
@@ -137,7 +136,7 @@ class _MyAppState extends State<MyApp> {
     print('[BackgroundFetch] configure success: $status');
     setState(() {
       _status = status;
-    });        
+    });
 
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
@@ -176,7 +175,6 @@ class _MyAppState extends State<MyApp> {
         appBar: new AppBar(
           title: const Text('BackgroundFetch Example', style: TextStyle(color: Colors.black)),
           backgroundColor: Colors.amberAccent,
-          brightness: Brightness.light,
           actions: <Widget>[
             Switch(value: _enabled, onChanged: _onClickEnable),
           ]
@@ -201,7 +199,7 @@ class _MyAppState extends State<MyApp> {
         bottomNavigationBar: BottomAppBar(
           child: Row(
             children: <Widget>[
-              RaisedButton(onPressed: _onClickStatus, child: Text('Status')),
+              ElevatedButton(onPressed: _onClickStatus, child: Text('Status')),
               Container(child: Text("$_status"), margin: EdgeInsets.only(left: 20.0))
             ]
           )
