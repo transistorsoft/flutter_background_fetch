@@ -45,8 +45,7 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
         periodic: false,
         forceAlarmManager: false,
         stopOnTerminate: false,
-        enableHeadless: true
-    ));
+        enableHeadless: true));
   }
   BackgroundFetch.finish(taskId);
 }
@@ -90,18 +89,20 @@ class _MyAppState extends State<MyApp> {
 
     // Configure BackgroundFetch.
     try {
-      var status = await BackgroundFetch.configure(BackgroundFetchConfig(
-        minimumFetchInterval: 15,
-        forceAlarmManager: false,
-        stopOnTerminate: false,
-        startOnBoot: true,
-        enableHeadless: true,
-        requiresBatteryNotLow: false,
-        requiresCharging: false,
-        requiresStorageNotLow: false,
-        requiresDeviceIdle: false,
-        requiredNetworkType: NetworkType.NONE
-      ), _onBackgroundFetch, _onBackgroundFetchTimeout);
+      var status = await BackgroundFetch.configure(
+          BackgroundFetchConfig(
+              minimumFetchInterval: 15,
+              forceAlarmManager: false,
+              stopOnTerminate: false,
+              startOnBoot: true,
+              enableHeadless: true,
+              requiresBatteryNotLow: false,
+              requiresCharging: false,
+              requiresStorageNotLow: false,
+              requiresDeviceIdle: false,
+              requiredNetworkType: NetworkType.NONE),
+          _onBackgroundFetch,
+          _onBackgroundFetchTimeout);
       print('[BackgroundFetch] configure success: $status');
       setState(() {
         _status = status;
@@ -116,9 +117,8 @@ class _MyAppState extends State<MyApp> {
           periodic: false,
           forceAlarmManager: true,
           stopOnTerminate: false,
-          enableHeadless: true
-      ));
-    } on Exception catch(e) {
+          enableHeadless: true));
+    } on Exception catch (e) {
       print("[BackgroundFetch] configure ERROR: $e");
     }
 
@@ -141,7 +141,8 @@ class _MyAppState extends State<MyApp> {
 
     if (taskId == "flutter_background_fetch") {
       // Perform an example HTTP request.
-      var url = Uri.https('www.googleapis.com', '/books/v1/volumes', {'q': '{http}'});
+      var url =
+          Uri.https('www.googleapis.com', '/books/v1/volumes', {'q': '{http}'});
 
       var response = await http.get(url);
       if (response.statusCode == 200) {
@@ -193,8 +194,7 @@ class _MyAppState extends State<MyApp> {
         periodic: false,
         forceAlarmManager: false,
         stopOnTerminate: false,
-        enableHeadless: true
-    ));
+        enableHeadless: true));
   }
 
   void _onClickClear() async {
@@ -204,48 +204,54 @@ class _MyAppState extends State<MyApp> {
       _events = [];
     });
   }
+
   @override
   Widget build(BuildContext context) {
-    const EMPTY_TEXT = Center(child: Text('Waiting for fetch events.  Simulate one.\n [Android] \$ ./scripts/simulate-fetch\n [iOS] XCode->Debug->Simulate Background Fetch'));
+    const EMPTY_TEXT = Center(
+        child: Text(
+            'Waiting for fetch events.  Simulate one.\n [Android] \$ ./scripts/simulate-fetch\n [iOS] XCode->Debug->Simulate Background Fetch'));
 
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-            title: const Text('BackgroundFetch Example', style: TextStyle(color: Colors.black)),
+            title: const Text('BackgroundFetch Example',
+                style: TextStyle(color: Colors.black)),
             backgroundColor: Colors.amberAccent,
             foregroundColor: Colors.black,
             actions: <Widget>[
               Switch(value: _enabled, onChanged: _onClickEnable),
-            ]
-        ),
-        body: (_events.isEmpty) ? EMPTY_TEXT : Container(
-          child: ListView.builder(
-              itemCount: _events.length,
-              itemBuilder: (context, index) {
-                var event = _events[index].split("@");
-                return InputDecorator(
-                    decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(left: 5.0, top: 5.0, bottom: 5.0),
-                        labelStyle: TextStyle(color: Colors.blue, fontSize: 20.0),
-                        labelText: "[${event[0].toString()}]"
-                    ),
-                    child: Text(event[1], style: TextStyle(color: Colors.black, fontSize: 16.0))
-                );
-              }
-          ),
-        ),
+            ]),
+        body: (_events.isEmpty)
+            ? EMPTY_TEXT
+            : Container(
+                child: ListView.builder(
+                    itemCount: _events.length,
+                    itemBuilder: (context, index) {
+                      var event = _events[index].split("@");
+                      return InputDecorator(
+                          decoration: InputDecoration(
+                              contentPadding: EdgeInsets.only(
+                                  left: 5.0, top: 5.0, bottom: 5.0),
+                              labelStyle:
+                                  TextStyle(color: Colors.blue, fontSize: 20.0),
+                              labelText: "[${event[0].toString()}]"),
+                          child: Text(event[1],
+                              style: TextStyle(
+                                  color: Colors.black, fontSize: 16.0)));
+                    }),
+              ),
         bottomNavigationBar: BottomAppBar(
             child: Container(
-                padding: EdgeInsets.only(left: 5.0, right:5.0),
+                padding: EdgeInsets.only(left: 5.0, right: 5.0),
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      ElevatedButton(onPressed: _onClickStatus, child: Text('Status: $_status')),
-                      ElevatedButton(onPressed: _onClickClear, child: Text('Clear'))
-                    ]
-                )
-            )
-        ),
+                      ElevatedButton(
+                          onPressed: _onClickStatus,
+                          child: Text('Status: $_status')),
+                      ElevatedButton(
+                          onPressed: _onClickClear, child: Text('Clear'))
+                    ]))),
       ),
     );
   }
