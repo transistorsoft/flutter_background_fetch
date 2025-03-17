@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/Users/chris/development/flutter"
-export "FLUTTER_APPLICATION_PATH=/Users/chris/workspace/background-geolocation/flutter/flutter_background_fetch/example"
+export "FLUTTER_ROOT=/Users/lithos/flutter"
+export "FLUTTER_APPLICATION_PATH=/Users/lithos/APPS/Lithos/Packages/flutter_background_fetch/example"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_TARGET=lib/main.dart"
 export "FLUTTER_BUILD_DIR=build"

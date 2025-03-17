@@ -1,6 +1,6 @@
 // This is a generated file; do not edit or check into version control.
-FLUTTER_ROOT=/Users/chris/development/flutter
-FLUTTER_APPLICATION_PATH=/Users/chris/workspace/background-geolocation/flutter/flutter_background_fetch/example
+FLUTTER_ROOT=/Users/lithos/flutter
+FLUTTER_APPLICATION_PATH=/Users/lithos/APPS/Lithos/Packages/flutter_background_fetch/example
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_TARGET=lib/main.dart
 FLUTTER_BUILD_DIR=build
