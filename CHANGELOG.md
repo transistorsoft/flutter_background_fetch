@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.3.8 &mdash; 2025-03-20
+* [Android] Update gradle config.  Default compileSdkVersion 34
+
 ## 1.3.7 &mdash; 2024-09-09
 * [Android] Removed unused `import` related to Flutter V1 embedding.
 

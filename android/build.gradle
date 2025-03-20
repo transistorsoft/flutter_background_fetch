@@ -1,7 +1,7 @@
 group 'com.transistorsoft.flutter.backgroundfetch'
 version '1.0-SNAPSHOT'
 
-def DEFAULT_LIFE_CYCLE_RUNTIME_VERSION          = "2.7.0"
+def DEFAULT_LIFE_CYCLE_RUNTIME_VERSION          = "2.8.7"
 def DEFAULT_LIFE_CYCLE_EXTENSIONS_VERSION       = "2.2.0"
 
 buildscript {
@@ -32,11 +32,15 @@ android {
         namespace("com.transistorsoft.flutter.backgroundfetch")
     }
 
-    compileSdkVersion safeExtGet('compileSdkVersion', 28)
+    compileSdkVersion safeExtGet('compileSdkVersion', 34)
 
     defaultConfig {
         minSdkVersion 16
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     lintOptions {
         disable 'InvalidPackage'
