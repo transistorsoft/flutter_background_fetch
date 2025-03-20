@@ -1,6 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.transistorsoft.flutter.backgroundfetch.backgroundfetchexample">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- The INTERNET permission is required for development. Specifically,
          flutter needs it to communicate with the running application
