@@ -22,6 +22,8 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
 @interface BackgroundFetchPlugin ()<FlutterStreamHandler>
 @end
 
+static BOOL didRegisterBackgroundFetchTasks = NO;
+
 @implementation BackgroundFetchPlugin {
     FlutterEventSink eventSink;
 }
@@ -34,8 +36,22 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    [[TSBackgroundFetch sharedInstance] didFinishLaunching];
+    [BackgroundFetchPlugin registerBackgroundTasksIfNeeded];
     return YES;
+}
+
++ (void)registerBackgroundTasksIfNeeded {
+    @synchronized (self) {
+        if (didRegisterBackgroundFetchTasks) {
+            return;
+        }
+
+        // BGTaskScheduler requires all launch handlers to be registered before application launch finishes.
+        // Flutter 3.41's UIScene fallback can deliver the plugin lifecycle callback after that point, so
+        // allow AppDelegate to invoke this method from the real didFinishLaunching phase.
+        didRegisterBackgroundFetchTasks = YES;
+        [[TSBackgroundFetch sharedInstance] didFinishLaunching];
+    }
 }
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {

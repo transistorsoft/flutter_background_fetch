@@ -55,6 +55,33 @@ BackgroundFetch.scheduleTask(TaskConfig(
 
 ```
 
+## Flutter 3.41+ UIScene lifecycle
+
+If your app has adopted Flutter's UIScene lifecycle, the plugin application lifecycle fallback can be delivered too late for `BGTaskScheduler`.
+iOS requires all launch handlers to be registered before application launch finishes.  In that case, call
+`BackgroundFetchPlugin.registerBackgroundTasksIfNeeded()` from your real `AppDelegate.didFinishLaunchingWithOptions` before returning from `super`.
+
+```swift
+import Flutter
+import UIKit
+import background_fetch
+
+@main
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+  ) -> Bool {
+    BackgroundFetchPlugin.registerBackgroundTasksIfNeeded()
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+  }
+}
+```
+
 <!--
 ## Privacy Manifest
 
