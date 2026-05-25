@@ -41,12 +41,26 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
     return YES;
 }
 
+#pragma mark - FlutterSceneLifeCycleDelegate
+
+// UIScene apps receive launch setup here; application:didFinishLaunchingWithOptions:
+// may arrive too late via Flutter's scene fallback.
+- (BOOL)scene:(UIScene *)scene
+    willConnectToSession:(UISceneSession *)session
+                 options:(nullable UISceneConnectionOptions *)connectionOptions API_AVAILABLE(ios(13.0)) {
+    [[TSBackgroundFetch sharedInstance] didFinishLaunching];
+    return NO;
+}
+
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
     NSString *methodPath = [NSString stringWithFormat:@"%@/%@", PLUGIN_PATH, METHOD_CHANNEL_NAME];
     FlutterMethodChannel* channel = [FlutterMethodChannel methodChannelWithName:methodPath binaryMessenger:[registrar messenger]];
 
     BackgroundFetchPlugin* instance = [[BackgroundFetchPlugin alloc] init];
     [registrar addApplicationDelegate:instance];
+    if (@available(iOS 13.0, *)) {
+        [registrar addSceneDelegate:instance];
+    }
     [registrar addMethodCallDelegate:instance channel:channel];
 
     NSString *eventPath = [NSString stringWithFormat:@"%@/%@", PLUGIN_PATH, EVENT_CHANNEL_NAME];
