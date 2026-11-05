@@ -17,7 +17,8 @@ Pod::Spec.new do |s|
   s.source_files = 'background_fetch/Sources/background_fetch/**/*.{h,m}'
   s.public_header_files = 'background_fetch/Sources/background_fetch/include/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'TSBackgroundFetch', '~> 4.1.0'
-  s.ios.deployment_target = '13.0'
+  # 4.2 is the first iOS 15 build; 4.1.x declares iOS 12, which Xcode 27 rejects (WO-001)
+  s.dependency 'TSBackgroundFetch', '~> 4.2'
+  s.ios.deployment_target = '15.0'
 end
 

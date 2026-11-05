@@ -23,7 +23,7 @@ example/                           # Example Flutter app
 ```
 
 **Native dependencies:**
-- iOS: `TSBackgroundFetch` (~> 4.0) via CocoaPods or SwiftPM
+- iOS: `TSBackgroundFetch` (~> 4.2) via CocoaPods or SwiftPM
 - Android: `com.transistorsoft:tsbackgroundfetch` (4.0.+) via Maven Central
 
 ## Build & Test
@@ -52,7 +52,7 @@ There are no automated unit/integration tests in this repo. Verification is manu
 - **Podspec:** `ios/background_fetch.podspec` — reads version from `pubspec.yaml`
 - **SwiftPM:** `ios/background_fetch/Package.swift` — depends on `transistorsoft/background-fetch` from GitHub
 - **Header path:** `ios/background_fetch/Sources/background_fetch/include/background_fetch/BackgroundFetchPlugin.h`
-- **Deployment target:** iOS 12.0
+- **Deployment target:** iOS 15.0
 - CocoaPods requires `:linkage => :static` in consumer Podfiles
 - Privacy manifest at `ios/background_fetch/Sources/background_fetch/PrivacyInfo.xcprivacy`
 
