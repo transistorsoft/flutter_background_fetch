@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## Unreleased
-* [iOS] Require iOS 15.0 (was 13.0). With CocoaPods, also require TSBackgroundFetch 4.2 (`~> 4.2`).
+* [iOS] Require iOS 15.0 (was 13.0) and TSBackgroundFetch 4.2 or any later 4.x: `from: "4.2.0"` with Swift Package Manager, `~> 4.2` with CocoaPods.
   - Flutter 3.47+ templates already target 15.0. On Flutter 3.38–3.46, raise your app's `IPHONEOS_DEPLOYMENT_TARGET` and Podfile `platform :ios` to 15.0.
   - Existing CocoaPods apps locked to TSBackgroundFetch 4.1.1 must run `pod update TSBackgroundFetch`. (WO-001)
 * [iOS] Get TSBackgroundFetch from one package manager only. Swift Package Manager (the Flutter default since 3.44) and CocoaPods must not both provide it in the same app.

@@ -16,9 +16,9 @@ let package = Package(
         )
     ],    
     dependencies: [
-        // Lower bound stays 4.1.0: TSLocationManager 4.8.x allows only TSBackgroundFetch 4.1.x, and a
-        // 4.2.0 floor makes apps using both unresolvable. Standalone apps still resolve 4.2.x. (WO-001)
-        .package(url: "https://github.com/transistorsoft/transistor-background-fetch.git", from: "4.1.0"),
+        // 4.2.0 through every later 4.x: 4.2 is the first iOS 15 build. An app that also uses
+        // background-geolocation needs a TSLocationManager that accepts 4.2 (4.8.x allows only 4.1.x). (WO-001)
+        .package(url: "https://github.com/transistorsoft/transistor-background-fetch.git", from: "4.2.0"),
         .package(name: "FlutterFramework", path: "../FlutterFramework")
     ],
     targets: [
