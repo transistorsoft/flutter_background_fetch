@@ -41,11 +41,17 @@ cd example/ios && pod install
 # Dart analysis
 flutter analyze
 
+# Unit tests (test/)
+flutter test
+
 # Simulate background fetch on Android
 adb shell cmd jobscheduler run -f com.transistorsoft.flutter.backgroundfetch.demo 999
 ```
 
-There are no automated unit/integration tests in this repo. Verification is manual via the example app.
+`flutter test` runs `test/`: WO-011's `stop()` tests (a method-channel mock and a signature guard).  Everything else
+is verified manually via the example app, and on devices by fetch-forge's lab.  Flutter 3.47's `flutter test` and
+`flutter analyze` rewrite `analysis_options.yaml` (they add an `analyzer: exclude:` block): restore it before
+committing.
 
 ## iOS Notes
 

@@ -1,6 +1,17 @@
 # CHANGELOG
 
 ## Unreleased
+* [Changed] **Breaking:** `BackgroundFetch.stop()` returns `Future<bool>` (was `Future<int>`) and resolves `true`, as `@transistorsoft/background-fetch-types` declares and the React Native and Capacitor plugins do. The `int` was the background-fetch status, never a result of the stop: on Android it was always `2`. Read `BackgroundFetch.status` for the status. Two changes the compiler does not catch: code that compares the value with a `STATUS_*` constant still compiles, but the comparison is now always `false` (the `unrelated_type_equality_checks` lint flags it); and a test that mocks the `com.transistorsoft/flutter_background_fetch/methods` channel and answers `'stop'` with an int now fails at run time (`type 'int' is not a subtype of type 'FutureOr<bool>'`): answer `true`. (WO-011)
+
+  __OLD__
+  ```dart
+  int status = await BackgroundFetch.stop();
+  ```
+  __NEW__
+  ```dart
+  bool stopped = await BackgroundFetch.stop();
+  int status = await BackgroundFetch.status;  // <-- if you used the status
+  ```
 * [iOS] Require iOS 15.0 (was 13.0) and TSBackgroundFetch 4.2 or any later 4.x: `from: "4.2.0"` with Swift Package Manager, `~> 4.2` with CocoaPods.
   - Flutter 3.47+ templates already target 15.0. On Flutter 3.38–3.46, raise your app's `IPHONEOS_DEPLOYMENT_TARGET` and Podfile `platform :ios` to 15.0.
   - Existing CocoaPods apps locked to TSBackgroundFetch 4.1.1 must run `pod update TSBackgroundFetch`. (WO-001)

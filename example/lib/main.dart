@@ -174,8 +174,8 @@ class _MyAppState extends State<MyApp> {
         print('[BackgroundFetch] start FAILURE: $e');
       });
     } else {
-      BackgroundFetch.stop().then((status) {
-        print('[BackgroundFetch] stop success: $status');
+      BackgroundFetch.stop().then((bool stopped) {
+        print('[BackgroundFetch] stop success: $stopped');
       });
     }
   }

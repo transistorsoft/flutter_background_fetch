@@ -519,11 +519,16 @@ class BackgroundFetch {
   /// .
   /// // Or stop ALL tasks
   /// BackgroundFetch.stop();
+  /// ```
   ///
+  /// Resolves `true` once the stop is made.  The value does not say whether a task was stopped.  For the
+  /// authorization status, read [status].
   ///
-  static Future<int> stop([String? taskId]) async {
-    int status = await _methodChannel.invokeMethod('stop', taskId);
-    return status;
+  // (WO-011) Future<bool>, as @transistorsoft/background-fetch-types declares stop(taskId?): Promise<boolean>: both
+  // natives answer `true`, as they do for scheduleTask.  Until 2.0.0 it was Future<int>, the background-fetch status,
+  // never a result of the stop.
+  static Future<bool> stop([String? taskId]) async {
+    return await _methodChannel.invokeMethod('stop', taskId);
   }
 
   /// Returns the current authorization status.
