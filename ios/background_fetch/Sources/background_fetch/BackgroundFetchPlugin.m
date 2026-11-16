@@ -136,7 +136,9 @@ static NSString *const ACTION_SCHEDULE_TASK = @"scheduleTask";
     }
     // Calling stop with nil taskId will cause TSBackgroundFetch to stop all custom-tasks from #scheduleTask
     [fetchManager stop:taskId];
-    [self status:result];
+    // (WO-011) YES, as the types declare and as scheduleTask answers: the SDK's stop is void, and the status this used
+    // to answer (backgroundRefreshStatus) said nothing about the stop.
+    result(@(YES));
 }
 
 -(void) status:(FlutterResult)result {

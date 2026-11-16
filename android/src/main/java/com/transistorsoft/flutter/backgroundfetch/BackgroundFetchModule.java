@@ -166,7 +166,9 @@ public class BackgroundFetchModule implements MethodCallHandler {
     private void stop(@Nullable String taskId, @NonNull Result result) {
         BackgroundFetch adapter = BackgroundFetch.getInstance(mContext);
         adapter.stop(taskId);
-        result.success(adapter.status());
+        // (WO-011) true, as the types declare and as scheduleTask answers: the SDK's stop is void, and the status
+        // this used to answer (always STATUS_AVAILABLE on Android) said nothing about the stop.
+        result.success(true);
     }
 
     private void status(@NonNull Result result) {

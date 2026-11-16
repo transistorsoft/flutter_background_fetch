@@ -10,6 +10,11 @@ dependencies:
   flutter:
     sdk: flutter
 
+# (WO-011) The plugin's own tests (test/).  A dev_dependency: it does not reach apps that depend on the plugin.
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
 flutter:
   plugin:
     platforms:
