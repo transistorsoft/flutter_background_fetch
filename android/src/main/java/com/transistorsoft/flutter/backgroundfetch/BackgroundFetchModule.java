@@ -1,6 +1,5 @@
 package com.transistorsoft.flutter.backgroundfetch;
 
-import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
@@ -11,6 +10,7 @@ import com.transistorsoft.tsbackgroundfetch.BackgroundFetch;
 import com.transistorsoft.tsbackgroundfetch.BackgroundFetchConfig;
 import com.transistorsoft.tsbackgroundfetch.LifecycleManager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,14 +32,14 @@ public class BackgroundFetchModule implements MethodCallHandler {
     static final String FETCH_TASK_ID                       = "flutter_background_fetch";
 
     private static final String METHOD_CHANNEL_NAME         = PLUGIN_ID + "/methods";
-    private static final String EVENT_CHANNEL_NAME = PLUGIN_ID + "/events";
+    static final String EVENT_CHANNEL_NAME                  = PLUGIN_ID + "/events";
 
     private static final String ACTION_REGISTER_HEADLESS_TASK = "registerHeadlessTask";
     private static final String ACTION_SCHEDULE_TASK          = "scheduleTask";
 
     private static final String HEADLESS_JOB_SERVICE_CLASS = HeadlessTask.class.getName();
 
-    private final FetchStreamHandler mFetchCallback;
+    private final FetchCallback mFetchCallback;
 
     private Context mContext;
 
@@ -50,7 +50,11 @@ public class BackgroundFetchModule implements MethodCallHandler {
     // "last-attached wins" and lost the main-engine handler whenever any
     // other engine detached.
     private final Map<BinaryMessenger, MethodChannel> mMethodChannels = new HashMap<>();
-    private EventChannel mEventChannelTask;
+
+    // (WO-012) Every plugin instance whose engine is alive (one per FlutterEngine, HeadlessTask's included), and the
+    // order of attaches.  Guarded by mInstances.
+    private final List<BackgroundFetchPlugin> mInstances = new ArrayList<>();
+    private long mAttachCounter = 0;
 
     public static BackgroundFetchModule getInstance() {
         if (sInstance == null) {
@@ -65,10 +69,10 @@ public class BackgroundFetchModule implements MethodCallHandler {
     }
 
     private BackgroundFetchModule() {
-        mFetchCallback = new FetchStreamHandler();
+        mFetchCallback = new FetchCallback();
     }
 
-    void onAttachedToEngine(Context context, BinaryMessenger messenger) {
+    void onAttachedToEngine(Context context, BinaryMessenger messenger, BackgroundFetchPlugin plugin) {
         // Poke BackgroundFetch alive once Context is received
         BackgroundFetch.getInstance(context);
         mIsAttachedToEngine.set(true);
@@ -77,9 +81,18 @@ public class BackgroundFetchModule implements MethodCallHandler {
         MethodChannel methodChannel = new MethodChannel(messenger, METHOD_CHANNEL_NAME);
         methodChannel.setMethodCallHandler(this);
         mMethodChannels.put(messenger, methodChannel);
+        // (WO-012) The instance's engine is alive: a delivery may go to it once it has attached to an Activity.
+        synchronized (mInstances) {
+            mInstances.add(plugin);
+        }
     }
 
-    void onDetachedFromEngine(BinaryMessenger messenger) {
+    void onDetachedFromEngine(BinaryMessenger messenger, BackgroundFetchPlugin plugin) {
+        // (WO-012) The engine is gone: drop its instance, leaving the flag alone.  An Activity detach, if any, came
+        // first and decided the flag (onDetachedFromActivity).
+        synchronized (mInstances) {
+            mInstances.remove(plugin);
+        }
         MethodChannel methodChannel = mMethodChannels.remove(messenger);
         if (methodChannel != null) {
             methodChannel.setMethodCallHandler(null);
@@ -89,28 +102,63 @@ public class BackgroundFetchModule implements MethodCallHandler {
         }
     }
 
-    void setActivity(@Nullable Activity activity, @Nullable BinaryMessenger messenger) {
-        if (activity != null) {
-            // Tear down any lingering headless FlutterEngine spawned by
-            // HeadlessTask while the main Activity was gone.  Keeping it
-            // alive alongside the main engine risks plugin-channel conflicts
-            // that surface as MissingPluginException on the /methods channel
-            // (or a stuck splash / logo) when an FGS kept the process alive
-            // post-termination.
-            HeadlessTask.destroyBackgroundIsolate();
+    // (WO-012) An Activity is attached to this instance's engine.
+    void onAttachedToActivity(BackgroundFetchPlugin plugin) {
+        // Tear down any lingering headless FlutterEngine spawned by
+        // HeadlessTask while the main Activity was gone.  Keeping it
+        // alive alongside the main engine risks plugin-channel conflicts
+        // that surface as MissingPluginException on the /methods channel
+        // (or a stuck splash / logo) when an FGS kept the process alive
+        // post-termination.
+        HeadlessTask.destroyBackgroundIsolate();
 
-            // Inform BackgroundFetch LifecycleManager that we're not Headless (an Activity exists).
-            LifecycleManager.getInstance().setHeadless(false);
-            if (messenger != null) {
-                mEventChannelTask = new EventChannel(messenger, EVENT_CHANNEL_NAME);
-                mEventChannelTask.setStreamHandler(mFetchCallback);
+        // Inform BackgroundFetch LifecycleManager that we're not Headless (an Activity exists).
+        LifecycleManager.getInstance().setHeadless(false);
+        synchronized (mInstances) {
+            plugin.mAttached = true;
+            plugin.mAttachSeq = ++mAttachCounter;
+        }
+    }
+
+    // (WO-012) The Activity is gone from this instance's engine.  A real detach (`terminal`) makes the SDK headless
+    // only when no other instance is still attached to an Activity: when an app restarts itself, the new Activity's
+    // engine attaches BEFORE the old one detaches, and the new screen is up.  A recreation's detach
+    // (onDetachedFromActivityForConfigChanges) never does (WO-003).
+    void onDetachedFromActivity(BackgroundFetchPlugin plugin, boolean terminal) {
+        boolean othersAttached = false;
+        synchronized (mInstances) {
+            plugin.mAttached = false;
+            for (BackgroundFetchPlugin p : mInstances) {
+                if (p != plugin && p.mAttached) {
+                    othersAttached = true;
+                    break;
+                }
             }
+        }
+        if (!terminal) return;
+        if (othersAttached) {
+            Log.d(BackgroundFetch.TAG, "[BackgroundFetchModule] An Activity detached while another is attached: not headless");
         } else {
             LifecycleManager.getInstance().setHeadless(true);
-            if (mEventChannelTask != null) {
-                mEventChannelTask.setStreamHandler(null);
+        }
+    }
+
+    // (WO-012) Where a fetch or a timeout goes: the sink of the instance attached most recently whose Dart side is
+    // listening.  With no attached instance listening, the instance attached most recently whose engine is still alive
+    // and listening (an engine that outlived its Activity, e.g. a FlutterEngineCache engine).  Never an instance that has
+    // not attached to an Activity at least once (HeadlessTask's engine, another plugin's background engine).
+    @Nullable
+    private EventChannel.EventSink deliveryTarget() {
+        synchronized (mInstances) {
+            BackgroundFetchPlugin attached = null;
+            BackgroundFetchPlugin alive = null;
+            for (BackgroundFetchPlugin p : mInstances) {
+                if (p.mAttachSeq == 0 || p.getEventSink() == null) continue;
+                if (p.mAttached && (attached == null || p.mAttachSeq > attached.mAttachSeq)) attached = p;
+                if (alive == null || p.mAttachSeq > alive.mAttachSeq) alive = p;
             }
-            mEventChannelTask = null;
+            BackgroundFetchPlugin target = (attached != null) ? attached : alive;
+            return (target != null) ? target.getEventSink() : null;
         }
     }
 
@@ -240,38 +288,31 @@ public class BackgroundFetchModule implements MethodCallHandler {
         return config;
     }
 
-    class FetchStreamHandler implements EventChannel.StreamHandler, BackgroundFetch.Callback {
-        private EventChannel.EventSink mEventSink;
-
+    // (WO-012) The one callback the SDK holds (configure()); it delivers to deliveryTarget().
+    class FetchCallback implements BackgroundFetch.Callback {
         @Override
         public void onFetch(String taskId) {
             Map<String, Object> event = new HashMap<>();
             event.put("timeout", false);
             event.put("taskId", taskId);
-            if (mEventSink == null) {
+            EventChannel.EventSink sink = deliveryTarget();
+            if (sink == null) {
                 Log.e(BackgroundFetch.TAG, "FetchStreamHandler.onFetch mEventSink is null.  Cannot fire Dart callback");
                 return;
             }
-            mEventSink.success(event);
+            sink.success(event);
         }
         @Override
         public void onTimeout(String taskId) {
             Map<String, Object> event = new HashMap<>();
             event.put("timeout", true);
             event.put("taskId", taskId);
-            if (mEventSink == null) {
+            EventChannel.EventSink sink = deliveryTarget();
+            if (sink == null) {
                 Log.e(BackgroundFetch.TAG, "FetchStreamHandler.onTimeout mEventSink is null.  Cannot fire Dart callback");
                 return;
             }
-            mEventSink.success(event);
-        }
-        @Override
-        public void onListen(Object args, EventChannel.EventSink eventSink) {
-            mEventSink = eventSink;
-        }
-        @Override
-        public void onCancel(Object args) {
-
+            sink.success(event);
         }
     }
 }
