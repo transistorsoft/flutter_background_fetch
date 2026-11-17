@@ -1,7 +1,6 @@
 # CHANGELOG
 
-## Unreleased
-* [Android] Fix: when an app restarts itself (`finish()` then `startActivity()`), the old Activity's destroy no longer makes the plugin headless with the new screen up, which stopped the next fetch (`stopOnTerminate: true`, or `false` without `enableHeadless`) or sent it to the headless task (`stopOnTerminate: false` with `enableHeadless: true`). Each FlutterEngine now keeps its own fetch event channel, so a new screen that calls `configure()` after the old one is destroyed receives its fetches too. (WO-012)
+## 2.0.0 &mdash; 2026-11-17
 * [Changed] **Breaking:** `BackgroundFetch.stop()` returns `Future<bool>` (was `Future<int>`) and resolves `true`, as `@transistorsoft/background-fetch-types` declares and the React Native and Capacitor plugins do. The `int` was the background-fetch status, never a result of the stop: on Android it was always `2`. Read `BackgroundFetch.status` for the status. Two changes the compiler does not catch: code that compares the value with a `STATUS_*` constant still compiles, but the comparison is now always `false` (the `unrelated_type_equality_checks` lint flags it); and a test that mocks the `com.transistorsoft/flutter_background_fetch/methods` channel and answers `'stop'` with an int now fails at run time (`type 'int' is not a subtype of type 'FutureOr<bool>'`): answer `true`. (WO-011)
 
   __OLD__
@@ -13,12 +12,14 @@
   bool stopped = await BackgroundFetch.stop();
   int status = await BackgroundFetch.status;  // <-- if you used the status
   ```
+* [Android] Fix: when an app restarts itself (`finish()` then `startActivity()`), the old Activity's destroy no longer makes the plugin headless with the new screen up, which stopped the next fetch (`stopOnTerminate: true`, or `false` without `enableHeadless`) or sent it to the headless task (`stopOnTerminate: false` with `enableHeadless: true`). Each FlutterEngine now keeps its own fetch event channel, so a new screen that calls `configure()` after the old one is destroyed receives its fetches too. (WO-012)
 * [iOS] Require iOS 15.0 (was 13.0) and TSBackgroundFetch 4.2 or any later 4.x: `from: "4.2.0"` with Swift Package Manager, `~> 4.2` with CocoaPods.
   - Flutter 3.47+ templates already target 15.0. On Flutter 3.38–3.46, raise your app's `IPHONEOS_DEPLOYMENT_TARGET` and Podfile `platform :ios` to 15.0.
   - Existing CocoaPods apps locked to TSBackgroundFetch 4.1.1 must run `pod update TSBackgroundFetch`. (WO-001)
 * [iOS] Get TSBackgroundFetch from one package manager only. Swift Package Manager (the Flutter default since 3.44) and CocoaPods must not both provide it in the same app.
   - CocoaPods Trunk becomes read-only on 2026-12-02, so CocoaPods apps stay on TSBackgroundFetch 4.2.x after that date.
   - Swift Package Manager apps keep getting new versions. (WO-001)
+* [iOS] If your app also uses `flutter_background_geolocation`, stay on 1.7.0 for now; a `^1.x` constraint already keeps you below 2.0.0. TSLocationManager 4.8.3, the latest, requires TSBackgroundFetch 4.1.x, so neither Swift Package Manager nor CocoaPods can resolve both. Upgrade once a TSLocationManager that accepts TSBackgroundFetch 4.2 is out and your `flutter_background_geolocation` accepts it (5.9.2 takes TSLocationManager 4.8.x only). With CocoaPods, then run `pod update TSLocationManager TSBackgroundFetch`. (WO-001)
 
 ## 1.7.0 &mdash; 2026-05-25
 * [iOS] Adopt `FlutterSceneLifeCycleDelegate` for Flutter 3.41 UIScene lifecycle support.
