@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## 2.0.1 &mdash; 2026-11-18
 * The plugin imports `package:flutter/widgets.dart` instead of `package:flutter/material.dart`, which Flutter deprecated after 3.47. The API and its behaviour are unchanged.
 * [Android] The example app builds on Flutter 3.50, which requires Android Gradle Plugin 9.1.1 or later: it now uses Android Gradle Plugin 9.3.1, Kotlin 2.4.20 and Gradle 9.6.0.
 
