@@ -5,7 +5,7 @@
 background_fetch &middot; [![pub package](https://img.shields.io/pub/v/background_fetch.svg)](https://pub.dev/packages/background_fetch)
 ==============================================================================
 
-By [**Transistor Software**](http://transistorsoft.com), creators of [**Flutter Background Geolocation**](http://www.transistorsoft.com/shop/products/flutter-background-geolocation)
+By [**Transistor Software**](https://transistorsoft.com), creators of [**Flutter Background Geolocation**](https://www.transistorsoft.com/shop/products/flutter-background-geolocation)
 
 ------------------------------------------------------------------------------
 

@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Unreleased
+* The plugin imports `package:flutter/widgets.dart` instead of `package:flutter/material.dart`, which Flutter deprecated after 3.47. The API and its behaviour are unchanged.
+
 ## 2.0.0 &mdash; 2026-11-17
 * [Changed] **Breaking:** `BackgroundFetch.stop()` returns `Future<bool>` (was `Future<int>`) and resolves `true`, as `@transistorsoft/background-fetch-types` declares and the React Native and Capacitor plugins do. The `int` was the background-fetch status, never a result of the stop: on Android it was always `2`. Read `BackgroundFetch.status` for the status. Two changes the compiler does not catch: code that compares the value with a `STATUS_*` constant still compiles, but the comparison is now always `false` (the `unrelated_type_equality_checks` lint flags it); and a test that mocks the `com.transistorsoft/flutter_background_fetch/methods` channel and answers `'stop'` with an int now fails at run time (`type 'int' is not a subtype of type 'FutureOr<bool>'`): answer `true`. (WO-011)
 

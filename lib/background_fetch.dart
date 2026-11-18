@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 const _PLUGIN_PATH = "com.transistorsoft/flutter_background_fetch";
 const _METHOD_CHANNEL_NAME = "$_PLUGIN_PATH/methods";
